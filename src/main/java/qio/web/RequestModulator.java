@@ -69,7 +69,6 @@ public class RequestModulator {
         Object object = httpMapping.getClassDetails().getObject();
 
         try {
-
             String response = (String) method.invoke(object, parameters);
 
             if(method.isAnnotationPresent(JsonOutput.class)){
@@ -87,8 +86,6 @@ public class RequestModulator {
                 req.getRequestDispatcher(response).forward(req, resp);
             }
 
-            return true;
-
         }catch(ClassCastException ccex){
             Qio.Injector.badge();
             System.out.println("");
@@ -101,6 +98,7 @@ public class RequestModulator {
             System.out.println("");
             ex.printStackTrace();
         }
+
         return true;
     }
 
@@ -180,21 +178,21 @@ public class RequestModulator {
         List<String> pathParts = getPathParts(uri);
         List<String> regexParts = getRegexParts(mapping);
 
-        List<String> good = new ArrayList<>();
+        List<String> httpValues = new ArrayList<>();
         for(int n = 0; n < regexParts.size(); n++){
             String regex = regexParts.get(n);
             if(regex.contains("A-Za-z0-9")){
-                good.add(pathParts.get(n));
+                httpValues.add(pathParts.get(n));
             }
         }
-        return good;
+        return httpValues;
     }
 
     protected HttpMapping getHttpMapping(String verb, String uri){
         HttpMapping httpMapping = null;
         for (Map.Entry<String, HttpMapping> mappingEntry : httpMappings.getMappings().entrySet()) {
             HttpMapping mapping = mappingEntry.getValue();
-            //System.out.println(uri + "         ::::::::     " + mapping.getRegexedPath());
+//            System.out.println(uri + "         ::::::::     " + mapping.getRegexedPath());
             Matcher matcher = Pattern.compile(mapping.getRegexedPath())
                     .matcher(uri);
             if(matcher.matches() &&

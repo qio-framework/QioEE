@@ -1,10 +1,10 @@
 package qio.jdbc;
 
+import org.h2.tools.Server;
 import qio.Qio;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.PrintWriter;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 public class BasicDataSource implements DataSource {
 
     public BasicDataSource(Builder builder){
+        this.init = true;
         this.dbDriver = builder.dbDriver;
         this.dbUrl = builder.dbUrl;
         this.dbName = builder.dbName;
@@ -22,6 +23,7 @@ public class BasicDataSource implements DataSource {
         BasicDataSource.DB = this.dbName;
     }
 
+    Boolean init;
     String dbDriver;
     String dbUrl;
     String dbName;
@@ -82,14 +84,6 @@ public class BasicDataSource implements DataSource {
             }
 
             Class.forName(dbDriver);
-
-            if(Qio.devMode &&
-                    !dbUrl.contains("runscript")){
-                String createDb = "'" + Qio.Assistant.getPath() +
-                        File.separator + "qio" +
-                        File.separator + "create-db.sql'\\;";
-                dbUrl += ";INIT=runscript from " + createDb;
-            }
 
             Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
             connection.setAutoCommit(false);

@@ -51,18 +51,4 @@ public class HttpMediator extends HttpServlet {
         handle(EndpointProcessor.DELETE, req, resp);
     }
 
-    @Override
-    public void destroy() {
-        super.destroy();
-        if(Qio.devMode){
-            DbMediator dbMediator = (DbMediator) Qio.z.get("dbmediator").getBean();
-            try {
-                dbMediator.dropDb();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
 }

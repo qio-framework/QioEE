@@ -45,19 +45,24 @@ public class Initializer {
         elementStorage.getBeans().put(Qio.QIO, qbean);
         Qio.set(elementStorage.getBeans());
 
-        if(Qio.devMode)initializeDevelopmentDb();
+        Qio.servletContext.setAttribute(Qio.QIO, qbean);
+        Qio.servletContext.setAttribute(Qio.HTTP_RESOURCES, resources);
 
         if(elementProcessor.getConfigs() != null &&
                 elementProcessor.getConfigs().size() > 0){
-            this.configurationProcessor = new ConfigurationProcessor(elementStorage, elementProcessor, propertyStorage);
+            configurationProcessor = new ConfigurationProcessor(elementStorage, elementProcessor, propertyStorage);
             configurationProcessor.run();
         }
 
-        this.annotationProcessor = new AnnotationProcessor(elementStorage, elementProcessor, propertyStorage);
+        if(Qio.devMode){
+            initDb();
+        }
+
+        annotationProcessor = new AnnotationProcessor(elementStorage, elementProcessor, propertyStorage);
         annotationProcessor.run();
 
         System.out.println(Qio.Assistant.SIGNATURE + " processing endpoints");
-        this.endpointProcessor = new EndpointProcessor(elementStorage, elementProcessor);
+        endpointProcessor = new EndpointProcessor(elementStorage, elementProcessor);
         endpointProcessor.run();
 
         if(Qio.dataEnabled != null &&
@@ -91,28 +96,18 @@ public class Initializer {
     protected void setHttpMappings(){
         endpointProcessor = getHttpProcessor();
         HttpMappings httpMappings = endpointProcessor.getMappings();
-
         Qio.servletContext.setAttribute(Qio.HTTP_MAPPINGS, httpMappings);
-        Qio.servletContext.setAttribute(Qio.HTTP_RESOURCES, resources);
-        Qio.servletContext.setAttribute(Qio.QIO, Qio.z.get(Qio.QIO));
     }
 
-    protected void initializeDevelopmentDb() throws Exception{
+    protected void initDb() {
         DbMediator mediator = new DbMediator(Qio.servletContext);
         Element element = new Element();
         element.setBean(mediator);
         elementStorage.getBeans().put(Qio.DBMEDIATOR, element);
-        createDb();
-    }
-
-    public static void createDb() throws Exception {
-        DbMediator dbSupport = (DbMediator) Qio.z.get(Qio.DBMEDIATOR).getBean();
-        dbSupport.createDb();
     }
 
     public EndpointProcessor getHttpProcessor() {
         return endpointProcessor;
     }
-
 
 }

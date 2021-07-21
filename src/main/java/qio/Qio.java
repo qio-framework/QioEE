@@ -70,7 +70,7 @@ public class Qio {
         new Initializer(this,
                         resources,
                         elementStorage,
-                elementProcessor,
+                        elementProcessor,
                         propertyStorage).init();
     }
 
@@ -239,7 +239,10 @@ public class Qio {
             if(object != null) {
                 String parameter = object.toString();
                 if (object.getClass().getTypeName().equals("java.lang.String")) {
-                    parameter = parameter.replace("'", "''");
+                    parameter = parameter.replace("'", "''")
+                            .replace("$", "\\$")
+                            .replace("#", "\\#")
+                            .replace("@", "\\@");
                 }
                 sql = sql.replaceFirst("\\[\\+\\]", parameter);
             }else{
