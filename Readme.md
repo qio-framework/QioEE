@@ -1,6 +1,6 @@
 <img src="http://www.qioframework.io/media/qio.png" width="290px" />
 
-Qio is a full-fledged Java Web Framework. It is Java EE ready! 
+Qio is a full-fledged Java Web Framework. It is Java EE ready not Jakarta EE. 
 
 ## Getting Started
 
