@@ -127,7 +127,7 @@ public class InstanceProcessor {
 
 
         public InstanceProcessor build() throws Exception{
-            System.out.println(Qio.Assistant.SIGNATURE + " injecting dependencies");
+            System.out.println(Qio.Assistant.SIGNATURE + " initializing dependencies");
             createClasses(getPath());
             return new InstanceProcessor(this);
         }
