@@ -5,8 +5,8 @@
 	<packaging>jar</packaging>
 	<version>0.2-SNAPSHOT</version>
 	<name>Qio</name>
-	<description>Qio Web Framework</description>
-	<url>https://github.com/qio-framework/Qio</url>
+	<description>Qio is a JEE Web Framework.</description>
+	<url>https://www.qioframework.io</url>
 
 	<licenses>
 		<license>
