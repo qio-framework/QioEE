@@ -13,101 +13,122 @@ import qio.model.web.HttpMappings;
 
 public class Initializer {
 
-    Qio qio;
+    public Initializer(Builder builder){}
 
-    String[] resources;
+    public static class Builder {
 
-    EndpointProcessor endpointProcessor;
+        Qio qio;
+        String[] resources;
+        ElementStorage elementStorage;
+        ElementProcessor elementProcessor;
+        PropertyStorage propertyStorage;
 
-    ElementStorage elementStorage;
-    ElementProcessor elementProcessor;
-    PropertyStorage propertyStorage;
+        EndpointProcessor endpointProcessor;
+        AnnotationProcessor annotationProcessor;
+        ConfigurationProcessor configurationProcessor;
 
-    ConfigurationProcessor configurationProcessor;
-    AnnotationProcessor annotationProcessor;
-
-    public Initializer(Qio qio,
-                       String[] resources,
-                       ElementStorage elementStorage,
-                       ElementProcessor elementProcessor,
-                       PropertyStorage propertyStorage){
-        this.qio = qio;
-        this.elementStorage = elementStorage;
-        this.elementProcessor = elementProcessor;
-        this.propertyStorage = propertyStorage;
-        this.resources = resources != null ? resources : new String[]{};
-    }
-
-    public Initializer init() throws Exception{
-
-        Element qbean = new Element();
-        qbean.setBean(qio);
-        elementStorage.getBeans().put(Qio.QIO, qbean);
-        Qio.set(elementStorage.getBeans());
-
-        Qio.servletContext.setAttribute(Qio.QIO, qbean);
-        Qio.servletContext.setAttribute(Qio.HTTP_RESOURCES, resources);
-
-        if(elementProcessor.getConfigs() != null &&
-                elementProcessor.getConfigs().size() > 0){
-            configurationProcessor = new ConfigurationProcessor(elementStorage, elementProcessor, propertyStorage);
-            configurationProcessor.run();
+        public Builder withQio(Qio qio){
+            this.qio = qio;
+            return this;
+        }
+        public Builder withResources(String[] resources){
+            this.resources = resources;
+            return this;
+        }
+        public Builder withElementStorage(ElementStorage elementStorage){
+            this.elementStorage = elementStorage;
+            return this;
+        }
+        public Builder withElementProcessor(ElementProcessor elementProcessor){
+            this.elementProcessor = elementProcessor;
+            return this;
+        }
+        public Builder withPropertyStorage(PropertyStorage propertyStorage){
+            this.propertyStorage = propertyStorage;
+            return this;
         }
 
-        if(Qio.devMode){
-            initDb();
+        private void setQioElement(){
+            Element qioElement = new Element();
+            qioElement.setBean(qio);
+            elementStorage.getBeans().put(Qio.QIO, qioElement);
+            Qio.set(elementStorage.getBeans());
+            Qio.servletContext.setAttribute(Qio.QIO, qioElement);
         }
 
-        annotationProcessor = new AnnotationProcessor(elementStorage, elementProcessor, propertyStorage);
-        annotationProcessor.run();
-
-        System.out.println(Qio.Assistant.SIGNATURE + " processing endpoints");
-        endpointProcessor = new EndpointProcessor(elementStorage, elementProcessor);
-        endpointProcessor.run();
-
-        if(Qio.dataEnabled != null &&
-                Qio.dataEnabled) {
-            System.out.println(Qio.Assistant.SIGNATURE + " validating datasource");
-            setDataSource();
+        private void setHttpResources(){
+            Qio.servletContext.setAttribute(Qio.HTTP_RESOURCES, resources);
         }
 
-        setHttpMappings();
-
-        System.out.println(Qio.Assistant.SIGNATURE + " project ready \u2713");
-        System.out.println(Qio.Assistant.SIGNATURE + " Go to \033[1;33mhttp://localhost:8080" + Qio.servletContext.getContextPath() + "\033[0m port may differ\n\n\n\n\n");
-
-        return this;
-    }
-
-    protected void setDataSource() throws Exception{
-        Element element = elementStorage.getBeans().get(Qio.DATASOURCE);
-        if(element == null){
-            Qio.Injector.badge();
-            throw new Exception("No data source configured... \nmake sure the method name in your config for your data source is named 'dataSource'\n\n\n\n\n");
+        private void initializeConfigProcessor() throws Exception {
+            if(elementProcessor.getConfigs() != null &&
+                    elementProcessor.getConfigs().size() > 0){
+                configurationProcessor = new ConfigurationProcessor(elementStorage, elementProcessor, propertyStorage);
+                configurationProcessor.run();
+            }
         }
-        BasicDataSource basicDataSource = (BasicDataSource) element.getBean();
-        setDataSource(basicDataSource);
-    }
 
-    public void setDataSource(BasicDataSource basicDataSource) {
-        qio.setDataSource(basicDataSource);
-    }
+        private void checkInitDevDb(){
+            if (Qio.devMode)initDevDb();
+        }
 
-    protected void setHttpMappings(){
-        endpointProcessor = getHttpProcessor();
-        HttpMappings httpMappings = endpointProcessor.getMappings();
-        Qio.servletContext.setAttribute(Qio.HTTP_MAPPINGS, httpMappings);
-    }
+        protected void initDevDb() {
+            DbMediator mediator = new DbMediator(Qio.servletContext);
+            Element element = new Element();
+            element.setBean(mediator);
+            elementStorage.getBeans().put(Qio.DBMEDIATOR, element);
+        }
 
-    protected void initDb() {
-        DbMediator mediator = new DbMediator(Qio.servletContext);
-        Element element = new Element();
-        element.setBean(mediator);
-        elementStorage.getBeans().put(Qio.DBMEDIATOR, element);
-    }
+        private void runAnnotationProcessor() throws Exception {
+            annotationProcessor = new AnnotationProcessor(elementStorage, elementProcessor, propertyStorage);
+            annotationProcessor.run();
+        }
 
-    public EndpointProcessor getHttpProcessor() {
-        return endpointProcessor;
+        private void runEndpointProcessor() throws Exception {
+            System.out.println(Qio.Assistant.SIGNATURE + " processing endpoints");
+            endpointProcessor = new EndpointProcessor(elementStorage, elementProcessor);
+            endpointProcessor.run();
+        }
+
+        private void validateDatasource() throws Exception {
+            if(Qio.dataEnabled != null &&
+                    Qio.dataEnabled) {
+                System.out.println(Qio.Assistant.SIGNATURE + " validating datasource");
+                Element element = elementStorage.getBeans().get(Qio.DATASOURCE);
+                if(element == null){
+                    Qio.Injector.badge();
+                    throw new Exception("No data source configured... \nmake sure the method name in your config for your data source is named 'dataSource'\n\n\n\n\n");
+                }
+                BasicDataSource basicDataSource = (BasicDataSource) element.getBean();
+                qio.setDataSource(basicDataSource);
+            }
+        }
+
+        protected void setHttpMappings(){
+            HttpMappings httpMappings = endpointProcessor.getMappings();
+            Qio.servletContext.setAttribute(Qio.HTTP_MAPPINGS, httpMappings);
+        }
+
+        private void ready(){
+            System.out.println(Qio.Assistant.SIGNATURE + " project ready \u2713");
+            System.out.println(Qio.Assistant.SIGNATURE + " Go to \033[1;33mhttp://localhost:8080" + Qio.servletContext.getContextPath() + "\033[0m port may differ\n\n\n\n\n");
+        }
+
+        private void validateResources(){
+            if(resources == null) resources = new String[]{};
+        }
+
+        public Builder initialize() throws Exception {
+            validateResources();setQioElement();setHttpResources();
+            initializeConfigProcessor();checkInitDevDb();runAnnotationProcessor();
+            runEndpointProcessor();validateDatasource();setHttpMappings();
+            ready();
+            return this;
+        }
+
+        public Initializer build() {
+            return new Initializer(this);
+        }
     }
 
 }

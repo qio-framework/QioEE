@@ -67,11 +67,14 @@ public class Qio {
         this.elementProcessor = injector.elementProcessor;
         this.propertyStorage = injector.propertyStorage;
 
-        new Initializer(this,
-                        resources,
-                        elementStorage,
-                        elementProcessor,
-                        propertyStorage).init();
+        new Initializer.Builder()
+                .withQio(this)
+                .withResources(resources)
+                .withElementStorage(elementStorage)
+                .withElementProcessor(elementProcessor)
+                .withPropertyStorage(propertyStorage)
+                .initialize()
+                .build();
     }
 
     public Object getBean(String name){
