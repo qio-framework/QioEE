@@ -56,9 +56,9 @@ public class StaticResource {
         if(resources == null) return false;
 
         String[] parts = uri.split("/");
-        List<String> resourceList = Arrays.asList(resources);
-        if(parts.length > 0) {
+        if(parts.length > 1) {
             String asset = parts[1];
+            List<String> resourceList = Arrays.asList(resources);
             if (resourceList.contains(asset)) return true;
         }
         return false;

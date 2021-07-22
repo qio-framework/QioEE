@@ -1,7 +1,6 @@
 package qio;
 
 import qio.processor.EndpointProcessor;
-import qio.support.DbMediator;
 import qio.web.RequestModulator;
 import qio.model.web.HttpMappings;
 

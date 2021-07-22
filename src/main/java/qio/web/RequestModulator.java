@@ -114,6 +114,7 @@ public class RequestModulator {
                 uri.endsWith("/")){
             uri = removeLast(uri);
         }
+        if(uri.equals(""))uri = "/";
         return uri;
     }
 

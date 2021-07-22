@@ -5,7 +5,7 @@
 	<packaging>jar</packaging>
 	<version>0.3-SNAPSHOT</version>
 	<name>Qio</name>
-	<description>Qio is a JEE Web Framework.</description>
+	<description>Qio is a Java EE Web Framework.</description>
 	<url>https://www.qioframework.io</url>
 
 	<licenses>
