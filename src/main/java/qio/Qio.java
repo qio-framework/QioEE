@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collector;
@@ -33,6 +34,7 @@ public class Qio {
     public static final String HTTP_MAPPINGS  = "qio-mappings";
     public static final String HTTP_REDIRECT  = "[redirect]";
     public static final String QIO_REDIRECT   = "qio-redirect";
+    public static final String RUNNER          = "qkio.support.Runner";
 
     ElementStorage elementStorage;
 
@@ -382,6 +384,7 @@ public class Qio {
         String dependencyFile;
         ElementStorage elementStorage;
         ServletContext servletContext;
+        Map<String, ObjectDetails> classes;
 
         ElementProcessor elementProcessor;
         PropertyStorage propertyStorage;
@@ -392,6 +395,7 @@ public class Qio {
             this.dataEnabled = false;
             this.elementStorage = new ElementStorage();
             this.propertyStorage = new PropertyStorage();
+            this.classes = new HashMap<>();
         }
 
         public Qio.Injector asEmbedded(Boolean runEmbedded){
@@ -430,8 +434,6 @@ public class Qio {
         }
 
         public static void badge(){
-
-
             System.out.println(Assistant.BLACK);
             System.out.println("               \n\n\n");
             System.out.println("                 ----- ");
@@ -439,54 +441,49 @@ public class Qio {
             System.out.println("                 ----- ");
             System.out.println("           \n\n\n");
             System.out.println(Assistant.BLACK);
-
-//            System.out.println("               \n\n\n");
-//            System.out.println("===========================================");
-//            System.out.println("===========================================");
-//            System.out.println("               \n");
-//            System.out.println(Assistant.BLUE + "       8888 ");
-//            System.out.println(Assistant.BLUE + "    8888   8888");
-//            System.out.println(Assistant.BLUE + "  8888      8888 " + Assistant.BLACK + "888    888");
-//            System.out.println(Assistant.BLUE + "  8888      8888 " + Assistant.BLACK + "888  888 888");
-//            System.out.println(Assistant.BLUE + "  8888      8888 " + Assistant.BLACK + "    888    888");
-//            System.out.println(Assistant.BLUE + "   8888   8888   " + Assistant.BLACK + "888 888    888");
-//            System.out.println(Assistant.BLUE + "     88888888    " + Assistant.BLACK + "888  888  888");
-//            System.out.println(Assistant.BLUE + "           888   " + Assistant.BLACK + "888    8888");
-//            System.out.println("               \n");
-//            System.out.println("===========================================");
-//            System.out.println("===========================================");
-//            System.out.println("               \n\n\n");
         }
 
-        public Qio inject() throws Exception{
-
+        private void sayHello(){
             System.out.println("\n\n");
             System.out.println("                 ----- ");
             System.out.println("              ( " + Qio.Assistant.BLUE + "  Qio " + Qio.Assistant.BLACK + "  )");
             System.out.println("                 ----- ");
 
             System.out.println("\n" + Qio.Assistant.SIGNATURE + " beginning setup");
+        }
 
+        private void runPropertiesProcessor() throws Exception {
             PropertiesProcessor propertiesProcessor = new PropertiesProcessor.Builder()
                     .asEmbedded(runEmbedded)
                     .withFiles(propertyFiles)
                     .withContext(servletContext)
                     .process();
-
             this.propertyStorage = propertiesProcessor.getPropertiesData();
+        }
 
-            InstanceProcessor processor = new InstanceProcessor.Builder()
+        private void runInstanceProcessor() throws Exception {
+            InstanceProcessor instanceProcessor = new InstanceProcessor.Builder()
                     .asEmbedded(runEmbedded)
                     .withContext(servletContext)
                     .build();
+            this.classes = instanceProcessor.getClasses();
+        }
 
-            Map<String, ObjectDetails> classes = processor.getClasses();
-
+        private void runElementsProcessor() throws Exception {
             this.elementProcessor = new ElementProcessor.Builder()
                     .withClasses(classes)
                     .withBeanData(elementStorage)
                     .prepare()
                     .build();
+        }
+
+        public Qio inject() throws Exception{
+
+            sayHello();
+            runPropertiesProcessor();
+            runInstanceProcessor();
+            runElementsProcessor();
+
             return new Qio(this);
         }
     }

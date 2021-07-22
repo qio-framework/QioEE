@@ -98,7 +98,7 @@ public class InstanceProcessor {
 
                     if (cls.isAnnotation() ||
                             cls.isInterface() ||
-                            cls.getName().equals("qkio.support.Runner") ||
+                            cls.getName().equals(Qio.RUNNER) ||
                             (cls.getName() == this.getClass().getName())) {
                         continue;
                     }
@@ -106,7 +106,6 @@ public class InstanceProcessor {
                     ObjectDetails objectDetails = new ObjectDetails();
                     objectDetails.setClazz(cls);
                     objectDetails.setName(Qio.Assistant.getName(cls.getName()));
-//                    objectDetails.setPath(cls.getName());
 
                     Constructor[] constructors = cls.getDeclaredConstructors();
                     for(Constructor constructor : constructors){

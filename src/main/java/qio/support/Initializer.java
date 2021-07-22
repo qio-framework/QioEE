@@ -59,15 +59,7 @@ public class Initializer {
         private void setHttpResources(){
             Qio.servletContext.setAttribute(Qio.HTTP_RESOURCES, resources);
         }
-
-        private void initializeConfigProcessor() throws Exception {
-            if(elementProcessor.getConfigs() != null &&
-                    elementProcessor.getConfigs().size() > 0){
-                configurationProcessor = new ConfigurationProcessor(elementStorage, elementProcessor, propertyStorage);
-                configurationProcessor.run();
-            }
-        }
-
+        
         private void checkInitDevDb(){
             if (Qio.devMode)initDevDb();
         }
@@ -77,6 +69,14 @@ public class Initializer {
             Element element = new Element();
             element.setBean(mediator);
             elementStorage.getBeans().put(Qio.DBMEDIATOR, element);
+        }
+
+        private void runConfigProcessor() throws Exception {
+            if(elementProcessor.getConfigs() != null &&
+                    elementProcessor.getConfigs().size() > 0){
+                configurationProcessor = new ConfigurationProcessor(elementStorage, elementProcessor, propertyStorage);
+                configurationProcessor.run();
+            }
         }
 
         private void runAnnotationProcessor() throws Exception {
@@ -109,7 +109,7 @@ public class Initializer {
             Qio.servletContext.setAttribute(Qio.HTTP_MAPPINGS, httpMappings);
         }
 
-        private void ready(){
+        private void sayReady(){
             System.out.println(Qio.Assistant.SIGNATURE + " project ready \u2713");
             System.out.println(Qio.Assistant.SIGNATURE + " Go to \033[1;33mhttp://localhost:8080" + Qio.servletContext.getContextPath() + "\033[0m port may differ\n\n\n\n\n");
         }
@@ -118,11 +118,27 @@ public class Initializer {
             if(resources == null) resources = new String[]{};
         }
 
+        private void setQioAttributes(){
+            setQioElement();
+            setHttpResources();
+            validateResources();
+        }
+
+        private void setQioDbAttributes() throws Exception {
+            validateDatasource();
+            checkInitDevDb();
+        }
+
         public Builder initialize() throws Exception {
-            validateResources();setQioElement();setHttpResources();
-            initializeConfigProcessor();checkInitDevDb();runAnnotationProcessor();
-            runEndpointProcessor();validateDatasource();setHttpMappings();
-            ready();
+
+            setQioAttributes();
+            runConfigProcessor();
+            runAnnotationProcessor();
+            runEndpointProcessor();
+            setQioDbAttributes();
+            setHttpMappings();
+
+            sayReady();
             return this;
         }
 
