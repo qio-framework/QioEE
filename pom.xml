@@ -3,7 +3,7 @@
 	<groupId>dev.j2ee</groupId>
 	<artifactId>qio</artifactId>
 	<packaging>jar</packaging>
-	<version>0.5-SNAPSHOT</version>
+	<version>0.4-SNAPSHOT</version>
 	<name>Qio</name>
 	<description>Qio is a Java EE Web Framework.</description>
 	<url>https://www.qioframework.io</url>
