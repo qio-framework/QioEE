@@ -35,8 +35,8 @@ public class DbMediator {
         return true;
     }
 
-    public Boolean dropDb() throws Exception {
-        System.out.println("cleaning db...");
+    public Boolean dropDb() {
+        System.out.println("qio cleaning...");
 
         if(Qio.devMode) {
             BasicDataSource dataSource = (BasicDataSource) Qio.z.get(Qio.DATASOURCE).getBean();

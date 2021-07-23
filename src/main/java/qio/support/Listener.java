@@ -12,17 +12,7 @@ import javax.servlet.annotation.WebListener;
 public class Listener implements ServletContextListener {
 
     @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        ServletContext servletContext = sce.getServletContext();
-        Element qioElement = (Element)servletContext.getAttribute(Qio.QIO);
-        Qio qio = (Qio) qioElement.getBean();
-        DbMediator mediator = (DbMediator) qio.getBean(Qio.DBMEDIATOR);
-        try {
-            mediator.createDb();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    public void contextInitialized(ServletContextEvent sce) {}
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {

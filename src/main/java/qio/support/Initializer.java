@@ -60,15 +60,14 @@ public class Initializer {
             Qio.servletContext.setAttribute(Qio.HTTP_RESOURCES, resources);
         }
         
-        private void checkInitDevDb(){
-            if (Qio.devMode)initDevDb();
-        }
-
-        protected void initDevDb() {
-            DbMediator mediator = new DbMediator(Qio.servletContext);
-            Element element = new Element();
-            element.setBean(mediator);
-            elementStorage.getBeans().put(Qio.DBMEDIATOR, element);
+        private void checkInitDevDb() throws Exception{
+            if (Qio.devMode){
+                DbMediator mediator = new DbMediator(Qio.servletContext);
+                Element element = new Element();
+                element.setBean(mediator);
+                elementStorage.getBeans().put(Qio.DBMEDIATOR, element);
+                mediator.createDb();
+            }
         }
 
         private void runConfigProcessor() throws Exception {

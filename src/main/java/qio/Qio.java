@@ -93,8 +93,9 @@ public class Qio {
 
     public Object get(String preSql, Object[] params, Class<?> cls){
         Object result = null;
+        String sql = "";
         try {
-            String sql = hydrateSql(preSql, params);
+            sql = hydrateSql(preSql, params);
             Connection connection = basicDataSource.getConnection();
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
@@ -109,19 +110,20 @@ public class Qio {
             connection.commit();
             connection.close();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException ex) {
+            Qio.Injector.badge();
+            System.out.println("bad sql grammar : " + sql);
+            System.out.println("\n\n\n");
+        } catch (Exception ex) {}
 
         return result;
     }
 
     public Integer getInteger(String preSql, Object[] params){
         Integer result = null;
+        String sql = "";
         try {
-            String sql = hydrateSql(preSql, params);
+            sql = hydrateSql(preSql, params);
             Connection connection = basicDataSource.getConnection();
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
@@ -137,19 +139,20 @@ public class Qio {
             connection.commit();
             connection.close();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException ex) {
+            Qio.Injector.badge();
+            System.out.println("bad sql grammar : " + sql);
+            System.out.println("\n\n\n");
+        } catch (Exception ex) {}
 
         return result;
     }
 
     public Long getLong(String preSql, Object[] params){
         Long result = null;
+        String sql = "";
         try {
-            String sql = hydrateSql(preSql, params);
+            sql = hydrateSql(preSql, params);
             Connection connection = basicDataSource.getConnection();
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
@@ -164,9 +167,12 @@ public class Qio {
 
             connection.commit();
             connection.close();
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
+        } catch (SQLException ex) {
+            Qio.Injector.badge();
+            System.out.println("bad sql grammar : " + sql);
+            System.out.println("\n\n\n");
+        } catch (Exception ex) {}
+
         return result;
     }
 
@@ -175,7 +181,7 @@ public class Qio {
             String sql = hydrateSql(preSql, params);
             Connection connection = basicDataSource.getConnection();
             Statement stmt = connection.createStatement();
-            Boolean saved = stmt.execute(sql);
+            stmt.execute(sql);
             connection.commit();
             connection.close();
         }catch(Exception ex){
