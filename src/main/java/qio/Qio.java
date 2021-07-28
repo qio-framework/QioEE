@@ -114,6 +114,7 @@ public class Qio {
             Qio.Injector.badge();
             System.out.println("bad sql grammar : " + sql);
             System.out.println("\n\n\n");
+            ex.printStackTrace();
         } catch (Exception ex) {}
 
         return result;
@@ -143,6 +144,7 @@ public class Qio {
             Qio.Injector.badge();
             System.out.println("bad sql grammar : " + sql);
             System.out.println("\n\n\n");
+            ex.printStackTrace();
         } catch (Exception ex) {}
 
         return result;
@@ -171,6 +173,7 @@ public class Qio {
             Qio.Injector.badge();
             System.out.println("bad sql grammar : " + sql);
             System.out.println("\n\n\n");
+            ex.printStackTrace();
         } catch (Exception ex) {}
 
         return result;

@@ -77,12 +77,6 @@ public class BasicDataSource implements DataSource {
     public Connection getConnection() throws SQLException {
         try {
 
-            if(connection != null &&
-                    !connection.isClosed()){
-                connection.commit();
-                connection.close();
-            }
-
             Class.forName(dbDriver);
 
             Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
