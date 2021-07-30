@@ -1,6 +1,6 @@
 <img src="http://qioframework.io/media/qio.png" width="290px" />
 
-[![version](https://img.shields.io/badge/version-0.4-green.svg)](https://semver.org)
+[![version](https://img.shields.io/badge/version-v0.4-green.svg)](https://semver.org)
 
 <img src="http://qioframework.io/media/qio-screen.png" width="390px"/>
 
