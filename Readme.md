@@ -1,6 +1,6 @@
 <img src="http://qioframework.io/media/qio.png" width="290px" />
 
-<img src="http://qioframework.io/media/qioscreen.png" width="690px"/>
+<img src="http://qioframework.io/media/qioscreen.png" width="490px"/>
 
 
 Qio is a full-fledged Java Web Framework. It is Java EE ready not Jakarta EE. 
