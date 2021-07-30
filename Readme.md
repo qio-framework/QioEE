@@ -1,8 +1,9 @@
 <img src="http://qioframework.io/media/qio.png" width="290px" />
 
+[![version](https://img.shields.io/badge/version-0.4-green.svg)](https://semver.org)
+
 <img src="http://qioframework.io/media/qio-screen.png" width="390px"/>
 
-[![version](https://img.shields.io/badge/version-0.4-green.svg)](https://semver.org)
 
 Qio is a full-fledged Java Web Framework. It is Java EE ready not Jakarta EE. 
 
