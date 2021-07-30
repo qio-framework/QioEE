@@ -77,7 +77,7 @@ public class ConfigurationProcessor {
                     elementProcessor.getClasses().put(clsName, objectDetails);
                 }
 
-                createAddBean(method, dependency);
+                createAddElement(method, dependency);
                 processedMethods.add(methodFeature);
 
             }catch(Exception ex){
@@ -116,11 +116,11 @@ public class ConfigurationProcessor {
         return processedMethods.size() == iterableMethods.size();
     }
 
-    protected void createAddBean(Method method, Object object){
+    protected void createAddElement(Method method, Object object){
         Element element = new Element();
-        element.setBean(object);
+        element.setElement(object);
         String classKey = Qio.Assistant.getName(method.getName());
-        this.elementStorage.getBeans().put(classKey, element);
+        this.elementStorage.getElements().put(classKey, element);
     }
 
     protected void setMapDependencyMethods() throws Exception {
@@ -143,14 +143,14 @@ public class ConfigurationProcessor {
                         throw new Exception("More than one dependency with the same name defined : " + method.getName());
                     }
 
-                    if(elementStorage.getBeans().containsKey(methodKey)){
+                    if(elementStorage.getElements().containsKey(methodKey)){
                         System.out.println("\n\n");
                         System.out.println("Warning: you elements being injected twice, once by configuration, the other via @Inject.");
                         System.out.println("Take a look at " + config.getName() + " and @Inject for " + method.getName());
                         System.out.println("\n\n");
-                        Element existingElement = elementStorage.getBeans().get(methodKey);
-                        existingElement.setBean(object);
-                        elementStorage.getBeans().replace(methodKey, existingElement);
+                        Element existingElement = elementStorage.getElements().get(methodKey);
+                        existingElement.setElement(object);
+                        elementStorage.getElements().replace(methodKey, existingElement);
                     }
 
                     MethodFeature methodFeature = new MethodFeature();

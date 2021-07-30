@@ -18,8 +18,8 @@ public class Listener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent sce) {
         ServletContext servletContext = sce.getServletContext();
         Element qioElement = (Element)servletContext.getAttribute(Qio.QIO);
-        Qio qio = (Qio) qioElement.getBean();
-        DbMediator mediator = (DbMediator) qio.getBean(Qio.DBMEDIATOR);
+        Qio qio = (Qio) qioElement.getElement();
+        DbMediator mediator = (DbMediator) qio.getElement(Qio.DBMEDIATOR);
         try {
             mediator.dropDb();
         } catch (Exception e) {

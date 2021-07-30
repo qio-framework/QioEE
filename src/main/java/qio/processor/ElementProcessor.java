@@ -73,20 +73,20 @@ public class ElementProcessor {
             }
         }
 
-        protected void setBeanData() throws Exception {
+        protected void setElementData() throws Exception {
             for(Map.Entry<String, ObjectDetails> entry : classes.entrySet()){
                 Class clazz = entry.getValue().getClazz();
 
                 if(clazz.isAnnotationPresent(qio.annotate.Element.class)){
-                    buildAddBean(entry);
+                    buildAddElement(entry);
                     elementCount++;
                 }
                 if(clazz.isAnnotationPresent(DataStore.class)){
-                    buildAddBean(entry);
+                    buildAddElement(entry);
                     jdbcCount++;
                 }
                 if(clazz.isAnnotationPresent(Service.class)){
-                    buildAddBean(entry);
+                    buildAddElement(entry);
                     serviceCount++;
                 }
                 if(clazz.isAnnotationPresent(HttpHandler.class)){
@@ -105,12 +105,12 @@ public class ElementProcessor {
             }
         }
 
-        protected void buildAddBean(Map.Entry<String, ObjectDetails> entry){
+        protected void buildAddElement(Map.Entry<String, ObjectDetails> entry){
             Element element = new Element();
             String key = entry.getKey();
             Object object = entry.getValue().getObject();
-            element.setBean(object);
-            this.elementStorage.getBeans().put(key, element);
+            element.setElement(object);
+            this.elementStorage.getElements().put(key, element);
         }
 
         public Builder withClasses(Map<String, ObjectDetails> classes){
@@ -118,14 +118,14 @@ public class ElementProcessor {
             return this;
         }
 
-        public Builder withBeanData(ElementStorage elementStorage){
+        public Builder withElementData(ElementStorage elementStorage){
             this.elementStorage = elementStorage;
             return this;
         }
 
         public Builder prepare() throws Exception {
             setConfigsData();
-            setBeanData();
+            setElementData();
             return this;
         }
 

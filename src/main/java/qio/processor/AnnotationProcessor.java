@@ -54,10 +54,10 @@ public class AnnotationProcessor {
             for(Field field: fields) {
                 if(field.isAnnotationPresent(Inject.class)) {
                     String fieldKey = field.getName().toLowerCase();
-                    if(elementStorage.getBeans().containsKey(fieldKey)){
-                        Object bean = elementStorage.getBeans().get(fieldKey).getBean();
+                    if(elementStorage.getElements().containsKey(fieldKey)){
+                        Object element = elementStorage.getElements().get(fieldKey).getElement();
                         field.setAccessible(true);
-                        field.set(object, bean);
+                        field.set(object, element);
                         processedFieldsCount++;
                     }else{
                         processAnnotations(z + 1);

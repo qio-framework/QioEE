@@ -2,22 +2,22 @@ package qio.model;
 
 public class Element {
 
-    Object bean;
-    Class<?> beanClass;
+    Object element;
+    Class<?> elementClass;
 
-    public Object getBean() {
-        return bean;
+    public Object getElement() {
+        return element;
     }
 
-    public void setBean(Object bean) {
-        this.bean = bean;
+    public void setElement(Object element) {
+        this.element = element;
     }
 
-    public Class<?> getBeanClass() {
-        return beanClass;
+    public Class<?> getElementClass() {
+        return elementClass;
     }
 
-    public void setBeanClass(Class<?> beanClass) {
-        this.beanClass = beanClass;
+    public void setElementClass(Class<?> elementClass) {
+        this.elementClass = elementClass;
     }
 }

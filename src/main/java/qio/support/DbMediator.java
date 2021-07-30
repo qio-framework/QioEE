@@ -25,7 +25,7 @@ public class DbMediator {
                     File.separator + "qio" +
                     File.separator + "create-db.sql");
 
-            BasicDataSource dataSource = (BasicDataSource) Qio.z.get(Qio.DATASOURCE).getBean();
+            BasicDataSource dataSource = (BasicDataSource) Qio.z.get(Qio.DATASOURCE).getElement();
             Connection conn = dataSource.getConnection();
             RunScript.execute(conn, new FileReader(createFile));
             conn.commit();
@@ -39,7 +39,7 @@ public class DbMediator {
         System.out.println("qio cleaning...");
 
         if(Qio.devMode) {
-            BasicDataSource dataSource = (BasicDataSource) Qio.z.get(Qio.DATASOURCE).getBean();
+            BasicDataSource dataSource = (BasicDataSource) Qio.z.get(Qio.DATASOURCE).getElement();
             String[] dbParts = dataSource.getDbUrl().split("jdbc:h2:");
 
             String dbPath = dbParts[1];

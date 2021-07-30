@@ -50,9 +50,9 @@ public class Initializer {
 
         private void setQioElement(){
             Element qioElement = new Element();
-            qioElement.setBean(qio);
-            elementStorage.getBeans().put(Qio.QIO, qioElement);
-            Qio.set(elementStorage.getBeans());
+            qioElement.setElement(qio);
+            elementStorage.getElements().put(Qio.QIO, qioElement);
+            Qio.set(elementStorage.getElements());
             Qio.servletContext.setAttribute(Qio.QIO, qioElement);
         }
 
@@ -64,8 +64,8 @@ public class Initializer {
             if (Qio.devMode){
                 DbMediator mediator = new DbMediator(Qio.servletContext);
                 Element element = new Element();
-                element.setBean(mediator);
-                elementStorage.getBeans().put(Qio.DBMEDIATOR, element);
+                element.setElement(mediator);
+                elementStorage.getElements().put(Qio.DBMEDIATOR, element);
                 mediator.createDb();
             }
         }
@@ -93,12 +93,12 @@ public class Initializer {
             if(Qio.dataEnabled != null &&
                     Qio.dataEnabled) {
                 System.out.println(Qio.Assistant.SIGNATURE + " validating datasource");
-                Element element = elementStorage.getBeans().get(Qio.DATASOURCE);
+                Element element = elementStorage.getElements().get(Qio.DATASOURCE);
                 if(element == null){
                     Qio.Injector.badge();
                     throw new Exception("No data source configured... \nmake sure the method name in your config for your data source is named 'dataSource'\n\n\n\n\n");
                 }
-                BasicDataSource basicDataSource = (BasicDataSource) element.getBean();
+                BasicDataSource basicDataSource = (BasicDataSource) element.getElement();
                 qio.setDataSource(basicDataSource);
             }
         }

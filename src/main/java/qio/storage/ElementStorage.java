@@ -7,14 +7,14 @@ import java.util.Map;
 
 public class ElementStorage {
 
-    Map<String, Element> beans;
+    Map<String, Element> elements;
 
     public ElementStorage(){
-        this.beans = new HashMap<>();
+        this.elements = new HashMap<>();
     }
 
-    public Map<String, Element> getBeans(){
-        return this.beans;
+    public Map<String, Element> getElements(){
+        return this.elements;
     }
 
 }

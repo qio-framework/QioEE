@@ -34,7 +34,7 @@ public class Qio {
     public static final String HTTP_MAPPINGS  = "qio-mappings";
     public static final String HTTP_REDIRECT  = "[redirect]";
     public static final String QIO_REDIRECT   = "qio-redirect";
-    public static final String RUNNER          = "qkio.support.Runner";
+    public static final String RUNNER         = "qkio.support.Runner";
 
     ElementStorage elementStorage;
 
@@ -78,17 +78,17 @@ public class Qio {
                 .initialize()
                 .build();
     }
-
-    public Object getBean(String name){
-        String beanName = name.toLowerCase();
-        if(elementStorage.getBeans().containsKey(beanName)){
-            return elementStorage.getBeans().get(beanName).getBean();
+    
+    public Object getElement(String name){
+        String elementName = name.toLowerCase();
+        if(elementStorage.getElements().containsKey(elementName)){
+            return elementStorage.getElements().get(elementName).getElement();
         }
         return null;
     }
 
-    public Map<String, Element> getBeans(){
-        return this.elementStorage.getBeans();
+    public Map<String, Element> getElements(){
+        return this.elementStorage.getElements();
     }
 
     public Object get(String preSql, Object[] params, Class<?> cls){
@@ -374,8 +374,8 @@ public class Qio {
         return object;
     }
 
-    public static boolean set(Map<String, Element> beans){
-        Qio.z = beans;
+    public static boolean set(Map<String, Element> elements){
+        Qio.z = elements;
         return true;
     }
 
@@ -481,7 +481,7 @@ public class Qio {
         private void runElementsProcessor() throws Exception {
             this.elementProcessor = new ElementProcessor.Builder()
                     .withClasses(classes)
-                    .withBeanData(elementStorage)
+                    .withElementData(elementStorage)
                     .prepare()
                     .build();
         }
