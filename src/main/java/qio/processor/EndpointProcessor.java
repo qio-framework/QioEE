@@ -13,6 +13,7 @@ import qio.model.web.TypeFeature;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class EndpointProcessor {
@@ -106,7 +107,10 @@ public class EndpointProcessor {
     protected void setBaseDetailsAdd(String path, HttpMapping mapping, Method method, ObjectDetails objectDetails) throws Exception{
 
         mapping.setTypeNames(new ArrayList<>());
-
+        Type[] types = method.getGenericParameterTypes();
+        for(Type type : types){
+            mapping.getTypeNames().add(type.getTypeName());
+        }
 
         List<TypeFeature> typeDetails = new ArrayList<>();
         Annotation[][] paramAnnotations = method.getParameterAnnotations();

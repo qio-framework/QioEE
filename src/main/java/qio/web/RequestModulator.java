@@ -2,15 +2,13 @@ package qio.web;
 
 import qio.Qio;
 import qio.annotate.JsonOutput;
-import qio.model.web.HttpMapping;
-import qio.model.web.HttpMappings;
-import qio.model.web.ResponseData;
-import qio.model.web.TypeFeature;
+import qio.model.web.*;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,8 +59,7 @@ public class RequestModulator {
             return false;
         }
 
-        Object[] parameters = getParameters(uri, httpMapping, req, resp, responseData);
-
+        Object[] parameters = getEndpointParameters(uri, httpMapping, req, resp, responseData);
         Method method = httpMapping.getMethod();
         method.setAccessible(true);
 
@@ -140,50 +137,57 @@ public class RequestModulator {
         return redirectParts[1];
     }
 
-
-    protected Object[] getParameters(String uri,
+    private Object[] getEndpointParameters(String uri,
                                    HttpMapping httpMapping,
                                    HttpServletRequest req,
                                    HttpServletResponse resp,
                                    ResponseData data){
 
-        List<String> values = getHttpValues(uri, httpMapping);
-        List<Object> parameters = new ArrayList<>();
-        parameters.add(req);
-        parameters.add(resp);
-        parameters.add(data);
-
-        for(int z = 0; z < httpMapping.getTypeDetails().size(); z++){
-            TypeFeature details = httpMapping.getTypeDetails().get(z);
-            Object preObj = values.get(z);
-            Object obj = preObj;
-            if (details.getType().equals("int")) {
-                obj = Integer.parseInt(preObj.toString());
-            } else if (details.getType().equals("double")) {
-                obj = Double.parseDouble(preObj.toString());
-            } else if (details.getType().equals("long")) {
-                obj = Long.parseLong(preObj.toString());
-            } else if (details.getType().equals("java.lang.Integer")) {
-                obj = Integer.parseInt(preObj.toString());
-            } else if (details.getType().equals("java.lang.Long")) {
-                obj = Long.parseLong(preObj.toString());
-            } else if (details.getType().equals("java.math.BigDecimal")) {
-                obj = new BigDecimal(preObj.toString());
+        List<EndpointPosition> endpointValues = getEndpointValues(uri, httpMapping);
+        List<Object> params = new ArrayList<>();
+        List<String> typeNames = httpMapping.getTypeNames();
+        int idx = 0;
+        for(int z = 0; z <  typeNames.size(); z++){
+            String type = typeNames.get(z);
+            if(type.equals("javax.servlet.http.HttpServletRequest")){
+                params.add(req);
             }
-            parameters.add(obj);
+            if(type.equals("javax.servlet.http.HttpServletResponse")){
+                params.add(resp);
+            }
+            if(type.equals("qio.model.web.ResponseData")){
+                params.add(data);
+            }
+            if(type.equals("java.lang.Integer")){
+                params.add(Integer.valueOf(endpointValues.get(idx).getValue()));
+                idx++;
+            }
+            if(type.equals("java.lang.Long")){
+                params.add(Long.valueOf(endpointValues.get(idx).getValue()));
+                idx++;
+            }
+            if(type.equals("java.math.BigDecimal")){
+                params.add(new BigDecimal(endpointValues.get(idx).getValue()));
+                idx++;
+            }
+            if(type.equals("java.lang.String")){
+                params.add(endpointValues.get(idx).getValue());
+                idx++;
+            }
         }
-        return parameters.toArray();
+
+        return params.toArray();
     }
 
-    protected List<String> getHttpValues(String uri, HttpMapping mapping){
+    protected List<EndpointPosition> getEndpointValues(String uri, HttpMapping mapping){
         List<String> pathParts = getPathParts(uri);
         List<String> regexParts = getRegexParts(mapping);
 
-        List<String> httpValues = new ArrayList<>();
+        List<EndpointPosition> httpValues = new ArrayList<>();
         for(int n = 0; n < regexParts.size(); n++){
             String regex = regexParts.get(n);
             if(regex.contains("A-Za-z0-9")){
-                httpValues.add(pathParts.get(n));
+                httpValues.add(new EndpointPosition(n, pathParts.get(n)));
             }
         }
         return httpValues;
@@ -198,7 +202,7 @@ public class RequestModulator {
                     .matcher(uri);
             if(matcher.matches() &&
                     mapping.getVerb().equals(verb) &&
-                    variablesMatchUp(uri, mapping)){
+                        variablesMatchUp(uri, mapping)){
                 httpMapping = mapping;
                 break;
             }
@@ -217,9 +221,9 @@ public class RequestModulator {
                 String type = typeDetail.getType();
 
                 if(type.equals("java.lang.Integer")){
-                    Object obj = Integer.parseInt(pathPart);
+                    Integer.parseInt(pathPart);
                 }else if(type.equals("java.lang.Long")){
-                    Object obj = Long.parseLong(pathPart);
+                    Long.parseLong(pathPart);
                 }
             }catch (Exception ex){
                 return false;
