@@ -57,6 +57,12 @@ public class HelloHandler {
 }
 ```
 
+finaly browse to : 
+
+```
+http://localhost:3000/q
+```
+
 For a walk through of a sample Todo application visit www.qioframework.io.
 
 
