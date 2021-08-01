@@ -9,16 +9,22 @@ Qio is a full-fledged Java Web Framework. It is Java EE ready not Jakarta EE.
 
 ## Getting Started
 
-Download the starter application
+1. Download the starter application
 
 ```
 git clone https://github.com/qio-framework/QioStarter.git
 ```
 
-then run:
+2. then run:
 
 ```
 mvn package jetty:run
+```
+
+3. finaly browse to : 
+
+```
+http://localhost:3000/q
 ```
 
 
@@ -55,12 +61,6 @@ public class HelloHandler {
     }
 
 }
-```
-
-finaly browse to : 
-
-```
-http://localhost:3000/q
 ```
 
 For a walk through of a sample Todo application visit www.qioframework.io.
