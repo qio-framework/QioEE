@@ -7,8 +7,8 @@ import qio.annotate.verbs.Post;
 import qio.annotate.verbs.Put;
 import qio.storage.ElementStorage;
 import qio.model.support.ObjectDetails;
-import qio.model.web.HttpMapping;
-import qio.model.web.HttpMappings;
+import qio.model.web.EndpointMapping;
+import qio.model.web.EndpointMappings;
 import qio.model.web.TypeFeature;
 
 import java.lang.annotation.Annotation;
@@ -26,14 +26,14 @@ public class EndpointProcessor {
     ElementProcessor elementProcessor;
     ElementStorage elementStorage;
     Map<String, ObjectDetails> processed;
-    HttpMappings httpMappings;
+    EndpointMappings endpointMappings;
 
     public EndpointProcessor(ElementStorage elementStorage,
                              ElementProcessor elementProcessor){
         this.elementStorage = elementStorage;
         this.elementProcessor = elementProcessor;
         this.processed = new HashMap<>();
-        this.httpMappings = new HttpMappings();
+        this.endpointMappings = new EndpointMappings();
     }
 
     public EndpointProcessor run() throws Exception{
@@ -75,7 +75,7 @@ public class EndpointProcessor {
     protected void setGetMapping(Method method, ObjectDetails objectDetails) throws Exception{
         Get get = method.getAnnotation(Get.class);
         String path = get.value();
-        HttpMapping mapping = new HttpMapping();
+        EndpointMapping mapping = new EndpointMapping();
         mapping.setVerb(GET);
         setBaseDetailsAdd(path, mapping, method, objectDetails);
     }
@@ -83,7 +83,7 @@ public class EndpointProcessor {
     protected void setPostMapping(Method method, ObjectDetails objectDetails) throws Exception{
         Post post = method.getAnnotation(Post.class);
         String path = post.value();
-        HttpMapping mapping = new HttpMapping();
+        EndpointMapping mapping = new EndpointMapping();
         mapping.setVerb(POST);
         setBaseDetailsAdd(path, mapping, method, objectDetails);
     }
@@ -91,7 +91,7 @@ public class EndpointProcessor {
     protected void setPutMapping(Method method, ObjectDetails objectDetails) throws Exception{
         Put put = method.getAnnotation(Put.class);
         String path = put.value();
-        HttpMapping mapping = new HttpMapping();
+        EndpointMapping mapping = new EndpointMapping();
         mapping.setVerb(PUT);
         setBaseDetailsAdd(path, mapping, method, objectDetails);
     }
@@ -99,12 +99,12 @@ public class EndpointProcessor {
     protected void setDeleteMapping(Method method, ObjectDetails objectDetails) throws Exception{
         Delete delete = method.getAnnotation(Delete.class);
         String path = delete.value();
-        HttpMapping mapping = new HttpMapping();
+        EndpointMapping mapping = new EndpointMapping();
         mapping.setVerb(DELETE);
         setBaseDetailsAdd(path, mapping, method, objectDetails);
     }
 
-    protected void setBaseDetailsAdd(String path, HttpMapping mapping, Method method, ObjectDetails objectDetails) throws Exception{
+    protected void setBaseDetailsAdd(String path, EndpointMapping mapping, Method method, ObjectDetails objectDetails) throws Exception{
 
         mapping.setTypeNames(new ArrayList<>());
         Type[] types = method.getGenericParameterTypes();
@@ -158,15 +158,15 @@ public class EndpointProcessor {
         mapping.setClassDetails(objectDetails);
 
         String key = mapping.getVerb().concat("-").concat(path);
-        if(httpMappings.contains(key)){
+        if(endpointMappings.contains(key)){
             throw new Exception("Request path + " + path + " exists multiple times.");
         }
 
-        httpMappings.add(key, mapping);
+        endpointMappings.add(key, mapping);
     }
 
 
-    public HttpMappings getMappings() {
-        return httpMappings;
+    public EndpointMappings getMappings() {
+        return endpointMappings;
     }
 }

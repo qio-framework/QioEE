@@ -3,19 +3,19 @@ package qio.model.web;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class HttpMappings {
+public class EndpointMappings {
 
-    ConcurrentMap<String, HttpMapping> mappings;
+    ConcurrentMap<String, EndpointMapping> mappings;
 
-    public HttpMappings(){
+    public EndpointMappings(){
         this.mappings = new ConcurrentHashMap<>();
     }
 
-    public void add(String key, HttpMapping httpMapping){
-        this.mappings.put(key, httpMapping);
+    public void add(String key, EndpointMapping endpointMapping){
+        this.mappings.put(key, endpointMapping);
     }
 
-    public HttpMapping get(String key){
+    public EndpointMapping get(String key){
         if(this.mappings.containsKey(key)){
             return this.mappings.get(key);
         }
@@ -26,11 +26,11 @@ public class HttpMappings {
         return this.mappings.containsKey(key);
     }
 
-    public ConcurrentMap<String, HttpMapping> getMappings() {
+    public ConcurrentMap<String, EndpointMapping> getMappings() {
         return mappings;
     }
 
-    public void setMappings(ConcurrentMap<String, HttpMapping> m) {
+    public void setMappings(ConcurrentMap<String, EndpointMapping> m) {
         this.mappings = mappings;
     }
 }

@@ -2,7 +2,7 @@ package qio;
 
 import qio.processor.EndpointProcessor;
 import qio.web.RequestModulator;
-import qio.model.web.HttpMappings;
+import qio.model.web.EndpointMappings;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -17,9 +17,9 @@ public class HttpMediator extends HttpServlet {
     @Override
     public void init(ServletConfig config) {
         ServletContext context = config .getServletContext();
-        HttpMappings httpMappings = (HttpMappings) context.getAttribute(Qio.HTTP_MAPPINGS);
+        EndpointMappings endpointMappings = (EndpointMappings) context.getAttribute(Qio.HTTP_MAPPINGS);
         String[] resources = (String[]) context.getAttribute(Qio.HTTP_RESOURCES);
-        requestModulator = new RequestModulator(resources, httpMappings);
+        requestModulator = new RequestModulator(resources, endpointMappings);
     }
 
     protected void handle(String verb, HttpServletRequest req, HttpServletResponse resp) {

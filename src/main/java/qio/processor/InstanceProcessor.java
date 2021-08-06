@@ -1,29 +1,40 @@
 package qio.processor;
 
 import qio.Qio;
+import qio.annotate.Events;
 import qio.model.support.ObjectDetails;
 
 import javax.servlet.ServletContext;
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
 public class InstanceProcessor {
 
+    Qio qio;
+    Object qioEvents;
     Map<String, ObjectDetails> classes;
 
     public InstanceProcessor(Builder builder){
+        this.qio = builder.qio;
+        this.qioEvents = builder.qioEvents;
         this.classes = builder.classes;
     }
 
+    public Object getQioEvents(){
+        return qioEvents;
+    }
     public Map<String, ObjectDetails> getClasses() {
         return classes;
     }
 
     public static class Builder{
 
+        Qio qio;
+        Object qioEvents;
         ClassLoader loader;
         Boolean runEmbedded;
         ServletContext servletContext;
@@ -33,27 +44,9 @@ public class InstanceProcessor {
             this.classes = new HashMap<>();
             this.loader = Thread.currentThread().getContextClassLoader();
         }
-
-        public Builder asEmbedded(Boolean runEmbedded) {
-            this.runEmbedded = runEmbedded;
+        public Builder withQio(Qio qio){
+            this.qio = qio;
             return this;
-        }
-
-        public Builder withContext(ServletContext servletContext){
-            this.servletContext = servletContext;
-            return this;
-        }
-
-        public String getPath(){
-            if(runEmbedded) {
-                return Paths.get("src", "main", "java")
-                        .toAbsolutePath()
-                        .toString();
-            }else{
-                return Paths.get("webapps", servletContext.getContextPath(), "WEB-INF", "classes")
-                        .toAbsolutePath()
-                        .toString();
-            }
         }
 
         protected void createClasses(String classesPath){
@@ -98,22 +91,19 @@ public class InstanceProcessor {
 
                     if (cls.isAnnotation() ||
                             cls.isInterface() ||
-                            cls.getName().equals(Qio.RUNNER) ||
                             (cls.getName() == this.getClass().getName())) {
                         continue;
                     }
 
+
                     ObjectDetails objectDetails = new ObjectDetails();
                     objectDetails.setClazz(cls);
-                    objectDetails.setName(Qio.Assistant.getName(cls.getName()));
+                    objectDetails.setName(Qio.getName(cls.getName()));
+                    Object object = getObject(cls);
+                    objectDetails.setObject(object);
 
-                    Constructor[] constructors = cls.getDeclaredConstructors();
-                    for(Constructor constructor : constructors){
-                        constructor.setAccessible(true);
-                        if(constructor.getParameterCount() == 0){
-                            Object object = constructor.newInstance();
-                            objectDetails.setObject(object);
-                        }
+                    if(cls.isAnnotationPresent(Events.class)){
+                        this.qioEvents = object;
                     }
 
                     classes.put(objectDetails.getName(), objectDetails);
@@ -124,10 +114,21 @@ public class InstanceProcessor {
             }
         }
 
+        protected Object getObject(Class cls) throws
+                IllegalAccessException, InstantiationException, InvocationTargetException {
+            Constructor[] constructors = cls.getDeclaredConstructors();
+            for(Constructor constructor : constructors){
+                constructor.setAccessible(true);
+                if(constructor.getParameterCount() == 0){
+                    return constructor.newInstance();
+                }
+            }
+            return null;
+        }
 
         public InstanceProcessor build() throws Exception{
-            System.out.println(Qio.Assistant.SIGNATURE + " initializing dependencies");
-            createClasses(getPath());
+            System.out.println(Qio.SIGNATURE + " initializing dependencies");
+            createClasses(qio.getClassesUri());
             return new InstanceProcessor(this);
         }
 

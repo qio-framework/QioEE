@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HttpMapping {
+public class EndpointMapping {
 
     String path;
     String regexedPath;
@@ -20,7 +20,7 @@ public class HttpMapping {
 
     ObjectDetails objectDetails;
 
-    public HttpMapping(){
+    public EndpointMapping(){
         this.variablePositions = new ArrayList<>();
     }
 

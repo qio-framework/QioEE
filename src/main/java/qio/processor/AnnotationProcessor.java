@@ -85,7 +85,7 @@ public class AnnotationProcessor {
                     processedFieldsCount){
                 processAnnotations( z + 1);
             }else{
-                String key = Qio.Assistant.getName(objectDetails.getName());
+                String key = Qio.getName(objectDetails.getName());
                 processed.put(key, objectDetails);
             }
         }

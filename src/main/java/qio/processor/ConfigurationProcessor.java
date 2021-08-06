@@ -58,13 +58,13 @@ public class ConfigurationProcessor {
         for(Integer z = idx; z < iterableMethods.size(); z++){
             MethodFeature methodFeature = iterableMethods.get(z);
             Method method = methodFeature.getMethod();
-            String methodName = Qio.Assistant.getName(method.getName());
+            String methodName = Qio.getName(method.getName());
             Object object = methodFeature.getObject();
 
             try {
 
                 Object dependency = method.invoke(object);
-                String clsName = Qio.Assistant.getName(dependency.getClass().getName());
+                String clsName = Qio.getName(dependency.getClass().getName());
 
                 if(elementProcessor.getClasses().get(clsName) != null){
                     elementProcessor.getClasses().get(clsName).setObject(dependency);
@@ -119,7 +119,7 @@ public class ConfigurationProcessor {
     protected void createAddElement(Method method, Object object){
         Element element = new Element();
         element.setElement(object);
-        String classKey = Qio.Assistant.getName(method.getName());
+        String classKey = Qio.getName(method.getName());
         this.elementStorage.getElements().put(classKey, element);
     }
 

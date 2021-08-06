@@ -5,13 +5,11 @@ import qio.processor.ElementProcessor;
 import qio.storage.PropertyStorage;
 import qio.jdbc.BasicDataSource;
 import qio.model.Element;
-import qio.model.support.ObjectDetails;
-import qio.processor.InstanceProcessor;
-import qio.processor.PropertiesProcessor;
 import qio.support.Initializer;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -19,7 +17,6 @@ import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collector;
@@ -27,26 +24,22 @@ import java.util.stream.Collectors;
 
 public class Qio {
 
-    public static final String QIO            = "qio";
-    public static final String DBMEDIATOR     = "dbmediator";
-    public static final String DATASOURCE     = "datasource";
-    public static final String HTTP_RESOURCES = "qio-resources";
-    public static final String HTTP_MAPPINGS  = "qio-mappings";
-    public static final String HTTP_REDIRECT  = "[redirect]";
-    public static final String QIO_REDIRECT   = "qio-redirect";
-    public static final String RUNNER         = "qkio.support.Runner";
+    public static final String QIO               = "qio";
+    public static final String DBMEDIATOR        = "dbmediator";
+    public static final String DATASOURCE        = "datasource";
+    public static final String HTTP_RESOURCES    = "qio-resources";
+    public static final String ENDPOINT_MAPPINGS = "qio-mappings";
+    public static final String HTTP_REDIRECT     = "[redirect]";
+    public static final String QIO_REDIRECT      = "qio-redirect";
+    public static final String RUNNER            = "qkio.support.Runner";
 
     ElementStorage elementStorage;
-
     BasicDataSource basicDataSource;
 
     public static Map<String, Element> z;
 
-    public static Boolean devMode;
-    public static Boolean runEmbedded;
-    public static Boolean dataEnabled;
-
-    public static ServletContext servletContext;
+    public Boolean devMode;
+    public ServletContext servletContext;
 
     String[] resources;
 
@@ -59,10 +52,8 @@ public class Qio {
 
     public Qio(Injector injector) throws Exception{
 
-        Qio.devMode = injector.devMode;
-        Qio.runEmbedded = injector.runEmbedded;
-        Qio.dataEnabled = injector.dataEnabled;
-        Qio.servletContext = injector.servletContext;
+        this.devMode = injector.devMode;
+        this.servletContext = injector.servletContext;
 
         this.resources = injector.resources;
         this.elementStorage = injector.elementStorage;
@@ -386,175 +377,158 @@ public class Qio {
     public static class Injector{
 
         Boolean devMode;
-        Boolean runEmbedded;
-        Boolean dataEnabled;
         String[] resources;
         String[] propertyFiles;
-        String dependencyFile;
         ElementStorage elementStorage;
         ServletContext servletContext;
-        Map<String, ObjectDetails> classes;
 
         ElementProcessor elementProcessor;
         PropertyStorage propertyStorage;
 
         public Injector(){
             this.devMode = false;
-            this.runEmbedded = false;
-            this.dataEnabled = false;
             this.elementStorage = new ElementStorage();
             this.propertyStorage = new PropertyStorage();
-            this.classes = new HashMap<>();
         }
-
-        public Qio.Injector asEmbedded(Boolean runEmbedded){
-            this.runEmbedded = runEmbedded;
-            return this;
-        }
-
-        public Qio.Injector dependencyFile(String dependencyFile){
-            this.dependencyFile = dependencyFile;
-            return this;
-        }
-
         public Qio.Injector withPropertyFiles(String[] propertyFiles){
             this.propertyFiles = propertyFiles;
             return this;
         }
-
         public Qio.Injector devMode(boolean devMode){
             this.devMode = devMode;
             return this;
         }
-
-        public Qio.Injector withDataEnabled(boolean dataEnabled){
-            this.dataEnabled = dataEnabled;
-            return this;
-        }
-
         public Qio.Injector withContext(ServletContext servletContext){
             this.servletContext = servletContext;
             return this;
         }
-
         public Qio.Injector withWebResources(String[] resources){
             this.resources = resources;
             return this;
         }
 
         public static void badge(){
-            System.out.println(Assistant.BLACK);
+            System.out.println(Qio.BLACK);
             System.out.println("               \n\n\n");
             System.out.println("                 ----- ");
-            System.out.println("              ( " + Assistant.BLUE + "  Qio " + Assistant.BLACK + "  )");
+            System.out.println("              ( " + Qio.BLUE + "  Qio " + Qio.BLACK + "  )");
             System.out.println("                 ----- ");
             System.out.println("           \n\n\n");
-            System.out.println(Assistant.BLACK);
-        }
-
-        private void sayHello(){
-            System.out.println("\n\n");
-            System.out.println("                 ----- ");
-            System.out.println("              ( " + Qio.Assistant.BLUE + "  Qio " + Qio.Assistant.BLACK + "  )");
-            System.out.println("                 ----- ");
-
-            System.out.println("\n" + Qio.Assistant.SIGNATURE + " beginning setup");
-        }
-
-        private void runPropertiesProcessor() throws Exception {
-            PropertiesProcessor propertiesProcessor = new PropertiesProcessor.Builder()
-                    .asEmbedded(runEmbedded)
-                    .withFiles(propertyFiles)
-                    .withContext(servletContext)
-                    .process();
-            this.propertyStorage = propertiesProcessor.getPropertiesData();
-        }
-
-        private void runInstanceProcessor() throws Exception {
-            InstanceProcessor instanceProcessor = new InstanceProcessor.Builder()
-                    .asEmbedded(runEmbedded)
-                    .withContext(servletContext)
-                    .build();
-            this.classes = instanceProcessor.getClasses();
-        }
-
-        private void runElementsProcessor() throws Exception {
-            this.elementProcessor = new ElementProcessor.Builder()
-                    .withClasses(classes)
-                    .withElementData(elementStorage)
-                    .prepare()
-                    .build();
+            System.out.println(Qio.BLACK);
         }
 
         public Qio inject() throws Exception{
-
-            sayHello();
-            runPropertiesProcessor();
-            runInstanceProcessor();
-            runElementsProcessor();
-
             return new Qio(this);
         }
     }
 
-    public static class Assistant {
+    public static final String BLACK = "\033[0;30m";
+    public static final String BLUE = "\033[1;34m";
+    public static final String SIGNATURE = "       +  ";
 
-        public static final String BLACK = "\033[0;30m";
-        public static final String BLUE = "\033[1;34m";
-        public static final String SIGNATURE = "       +  ";
-
-        public static String removeLast(String s) {
-            return (s == null) ? null : s.replaceAll(".$", "");
-        }
-
-        public static String getMain() {
-            for (final Map.Entry<String, String> entry : System.getenv().entrySet())
-                if (entry.getKey().startsWith("JAVA_MAIN_CLASS")) // like JAVA_MAIN_CLASS_13328
-                    return entry.getValue();
-            throw new IllegalStateException("Cannot determine main class.");
-        }
-
-        public static String getPath(){
-            if(Qio.runEmbedded) {
-                return Paths.get("src", "main", "resources")
-                        .toAbsolutePath()
-                        .toString();
-            }else{
-                return Paths.get("webapps", servletContext.getContextPath(), "WEB-INF", "classes")
-                        .toAbsolutePath()
-                        .toString();
-            }
-        }
-
-        public static String getTypeName(String typeName) {
-            int index = typeName.lastIndexOf(".");
-            if(index > 0){
-                typeName = typeName.substring(index + 1);
-            }
-            return typeName;
-        }
-
-        public static String getName(String nameWithExt){
-            int index = nameWithExt.lastIndexOf(".");
-            String qualifiedName = nameWithExt;
-            if(index > 0){
-                qualifiedName = qualifiedName.substring(index + 1);
-            }
-            return qualifiedName.toLowerCase();
-        }
-
-        public static <T> Collector<T, ?, T> toSingleton() {
-            return Collectors.collectingAndThen(
-                    Collectors.toList(),
-                    list -> {
-                        if (list.size() != 1) {
-                            throw new IllegalStateException();
-                        }
-                        return list.get(0);
-                    }
-            );
-        }
-
+    public static String removeLast(String s) {
+        return (s == null) ? null : s.replaceAll(".$", "");
     }
+
+    public static String getMain() {
+        for (final Map.Entry<String, String> entry : System.getenv().entrySet())
+            if (entry.getKey().startsWith("JAVA_MAIN_CLASS")) // like JAVA_MAIN_CLASS_13328
+                return entry.getValue();
+        throw new IllegalStateException("Cannot determine main class.");
+    }
+
+    public boolean inDevMode(){
+        return this.devMode;
+    }
+
+    public ServletContext getServletContext(){
+        return this.servletContext;
+    }
+
+    public static String getResourceUri(ServletContext servletContext) throws Exception{
+        String resourceUri = Paths.get("src", "main", "resources")
+                .toAbsolutePath()
+                .toString();
+        File resourceDir = new File(resourceUri);
+        if(resourceDir.exists()){
+            return resourceUri;
+        }
+        String classesUri = Paths.get("webapps", servletContext.getContextPath(), "WEB-INF", "classes")
+                .toAbsolutePath()
+                .toString();
+        File classesDir = new File(classesUri);
+        if(classesDir.exists()) {
+            return classesUri;
+        }
+        throw new Exception("Qio : unable to locate resource path");
+    }
+
+    public String getResourceUri() throws Exception{
+        String resourceUri = Paths.get("src", "main", "resources")
+                .toAbsolutePath()
+                .toString();
+        File resourceDir = new File(resourceUri);
+        if(resourceDir.exists()){
+            return resourceUri;
+        }
+        String classesUri = Paths.get("webapps", getServletContext().getContextPath(), "WEB-INF", "classes")
+                .toAbsolutePath()
+                .toString();
+        File classesDir = new File(classesUri);
+        if(classesDir.exists()) {
+            return classesUri;
+        }
+        throw new Exception("Qio : unable to locate resource path");
+    }
+
+    public String getClassesUri() throws Exception{
+        String classesUri = Paths.get("webapps", this.getServletContext().getContextPath(), "WEB-INF", "classes")
+                .toAbsolutePath()
+                .toString();
+        File classesDir = new File(classesUri);
+        if(classesDir.exists()){
+            return classesUri;
+        }
+
+        classesUri = Paths.get("src", "main", "java")
+                .toAbsolutePath()
+                .toString();
+        classesDir = new File(classesUri);
+        if(classesDir.exists()){
+            return classesUri;
+        }
+        throw new Exception("Qio : unable to locate class uri");
+    }
+
+    public static String getTypeName(String typeName) {
+        int index = typeName.lastIndexOf(".");
+        if(index > 0){
+            typeName = typeName.substring(index + 1);
+        }
+        return typeName;
+    }
+
+    public static String getName(String nameWithExt){
+        int index = nameWithExt.lastIndexOf(".");
+        String qualifiedName = nameWithExt;
+        if(index > 0){
+            qualifiedName = qualifiedName.substring(index + 1);
+        }
+        return qualifiedName.toLowerCase();
+    }
+
+    public static <T> Collector<T, ?, T> toSingleton() {
+        return Collectors.collectingAndThen(
+                Collectors.toList(),
+                list -> {
+                    if (list.size() != 1) {
+                        throw new IllegalStateException();
+                    }
+                    return list.get(0);
+                }
+        );
+    }
+
+
 
 }

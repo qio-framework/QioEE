@@ -71,7 +71,7 @@ public class PropertiesProcessor {
 
         protected void traversePropertiesData() throws Exception{
 
-            System.out.println(Qio.Assistant.SIGNATURE + " resolving properties");
+            System.out.println(Qio.SIGNATURE + " resolving properties");
             if(propertiesFiles != null) {
 
                 for (String propertyFile : propertiesFiles) {

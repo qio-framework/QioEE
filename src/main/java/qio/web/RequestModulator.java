@@ -8,7 +8,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,11 +19,11 @@ import java.util.regex.Pattern;
 public class RequestModulator {
 
     String[] resources;
-    HttpMappings httpMappings;
+    EndpointMappings endpointMappings;
 
-    public RequestModulator(String[] resources, HttpMappings httpMappings){
+    public RequestModulator(String[] resources, EndpointMappings endpointMappings){
         this.resources = resources;
-        this.httpMappings = httpMappings;
+        this.endpointMappings = endpointMappings;
     }
 
     public boolean handle(String verb, HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -41,9 +40,9 @@ public class RequestModulator {
             return true;
         }
 
-        HttpMapping httpMapping = getHttpMapping(verb, uri);
+        EndpointMapping endpointMapping = getHttpMapping(verb, uri);
 
-        if(httpMapping == null){
+        if(endpointMapping == null){
             badge(resp);
             resp.getWriter().println(uri + " is 404. " + verb);
             resp.getWriter().flush();
@@ -51,7 +50,7 @@ public class RequestModulator {
         }
 
         ResponseData responseData = new ResponseData();
-        if (!httpMapping.getVerb().equals(verb)) {
+        if (!endpointMapping.getVerb().equals(verb)) {
             responseData.put("verb", verb);
             badge(resp);
             resp.getWriter().println(verb + " not allowed for " + uri);
@@ -59,11 +58,11 @@ public class RequestModulator {
             return false;
         }
 
-        Object[] parameters = getEndpointParameters(uri, httpMapping, req, resp, responseData);
-        Method method = httpMapping.getMethod();
+        Object[] parameters = getEndpointParameters(uri, endpointMapping, req, resp, responseData);
+        Method method = endpointMapping.getMethod();
         method.setAccessible(true);
 
-        Object object = httpMapping.getClassDetails().getObject();
+        Object object = endpointMapping.getClassDetails().getObject();
 
         try {
             String response = (String) method.invoke(object, parameters);
@@ -91,7 +90,7 @@ public class RequestModulator {
             ccex.printStackTrace();
         }catch (Exception ex){
             System.out.println("");
-            System.out.println(Qio.Assistant.SIGNATURE + "   " +  httpMapping.getVerb() + " :: " + httpMapping.getPath());
+            System.out.println(Qio.SIGNATURE + "   " +  endpointMapping.getVerb() + " :: " + endpointMapping.getPath());
             System.out.println("");
             ex.printStackTrace();
         }
@@ -128,7 +127,7 @@ public class RequestModulator {
         return Arrays.asList(uri.split("/"));
     }
 
-    protected List<String> getRegexParts(HttpMapping mapping){
+    protected List<String> getRegexParts(EndpointMapping mapping){
         return Arrays.asList(mapping.getRegexedPath().split("/"));
     }
 
@@ -138,14 +137,14 @@ public class RequestModulator {
     }
 
     private Object[] getEndpointParameters(String uri,
-                                   HttpMapping httpMapping,
+                                   EndpointMapping endpointMapping,
                                    HttpServletRequest req,
                                    HttpServletResponse resp,
                                    ResponseData data){
 
-        List<EndpointPosition> endpointValues = getEndpointValues(uri, httpMapping);
+        List<EndpointPosition> endpointValues = getEndpointValues(uri, endpointMapping);
         List<Object> params = new ArrayList<>();
-        List<String> typeNames = httpMapping.getTypeNames();
+        List<String> typeNames = endpointMapping.getTypeNames();
         int idx = 0;
         for(int z = 0; z <  typeNames.size(); z++){
             String type = typeNames.get(z);
@@ -179,7 +178,7 @@ public class RequestModulator {
         return params.toArray();
     }
 
-    protected List<EndpointPosition> getEndpointValues(String uri, HttpMapping mapping){
+    protected List<EndpointPosition> getEndpointValues(String uri, EndpointMapping mapping){
         List<String> pathParts = getPathParts(uri);
         List<String> regexParts = getRegexParts(mapping);
 
@@ -193,30 +192,30 @@ public class RequestModulator {
         return httpValues;
     }
 
-    protected HttpMapping getHttpMapping(String verb, String uri){
-        HttpMapping httpMapping = null;
-        for (Map.Entry<String, HttpMapping> mappingEntry : httpMappings.getMappings().entrySet()) {
-            HttpMapping mapping = mappingEntry.getValue();
+    protected EndpointMapping getHttpMapping(String verb, String uri){
+        EndpointMapping endpointMapping = null;
+        for (Map.Entry<String, EndpointMapping> mappingEntry : endpointMappings.getMappings().entrySet()) {
+            EndpointMapping mapping = mappingEntry.getValue();
 //            System.out.println(uri + "         ::::::::     " + mapping.getRegexedPath());
             Matcher matcher = Pattern.compile(mapping.getRegexedPath())
                     .matcher(uri);
             if(matcher.matches() &&
                     mapping.getVerb().equals(verb) &&
                         variablesMatchUp(uri, mapping)){
-                httpMapping = mapping;
+                endpointMapping = mapping;
                 break;
             }
         }
-        return httpMapping;
+        return endpointMapping;
     }
 
-    protected boolean variablesMatchUp(String uri, HttpMapping httpMapping){
+    protected boolean variablesMatchUp(String uri, EndpointMapping endpointMapping){
         List<String> parts = Arrays.asList(uri.split("/"));
 
-        for(int z = 0; z < httpMapping.getTypeDetails().size(); z++){
+        for(int z = 0; z < endpointMapping.getTypeDetails().size(); z++){
             try{
-                TypeFeature typeDetail = httpMapping.getTypeDetails().get(z);
-                int position = httpMapping.getVariablePositions().get(z);
+                TypeFeature typeDetail = endpointMapping.getTypeDetails().get(z);
+                int position = endpointMapping.getVariablePositions().get(z);
                 String pathPart = parts.get(position);
                 String type = typeDetail.getType();
 
