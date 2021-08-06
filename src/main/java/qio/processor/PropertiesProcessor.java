@@ -26,8 +26,7 @@ public class PropertiesProcessor {
 
     public static class Builder{
 
-        Boolean runEmbedded;
-        ServletContext context;
+        Qio qio;
         String[] propertiesFiles;
         PropertyStorage propertyStorage;
 
@@ -35,34 +34,18 @@ public class PropertiesProcessor {
             this.propertiesFiles = new String[]{};
             this.propertyStorage = new PropertyStorage();
         }
-
-        public Builder asEmbedded(Boolean runEmbedded){
-            this.runEmbedded = runEmbedded;
+        public Builder withQio(Qio qio){
+            this.qio = qio;
             return this;
         }
-
-        public Builder withContext(ServletContext context){
-            this.context = context;
-            return this;
-        }
-
         public Builder withFiles(String[] propertiesFiles){
             this.propertiesFiles = propertiesFiles;
             return this;
         }
 
         protected File getPropertiesFile(String propertyFile) throws Exception{
-            String classPath = Paths.get("webapps", context.getContextPath(), "WEB-INF", "classes")
-                    .toAbsolutePath()
-                    .toString();
-
-            if(runEmbedded != null && runEmbedded){
-                classPath = Paths.get("src", "main", "resources")
-                        .toAbsolutePath()
-                        .toString();
-            }
-
-            File file = new File(classPath.concat(File.separator).concat(propertyFile));
+            String resourceUri = qio.getResourceUri();
+            File file = new File(resourceUri + File.separator + propertyFile);
             if(!file.exists()) {
                 throw new Exception(propertyFile.concat(" properties file cannot be located..."));
             }

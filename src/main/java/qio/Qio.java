@@ -42,6 +42,7 @@ public class Qio {
     public ServletContext servletContext;
 
     String[] resources;
+    String[] propertiesFiles;
 
     ElementProcessor elementProcessor;
     PropertyStorage propertyStorage;
@@ -54,6 +55,7 @@ public class Qio {
 
         this.devMode = injector.devMode;
         this.servletContext = injector.servletContext;
+        this.propertiesFiles = injector.propertyFiles;
 
         this.resources = injector.resources;
         this.elementStorage = injector.elementStorage;
@@ -443,6 +445,10 @@ public class Qio {
 
     public ServletContext getServletContext(){
         return this.servletContext;
+    }
+
+    public String[] getPropertiesFiles(){
+        return this.propertiesFiles;
     }
 
     public static String getResourceUri(ServletContext servletContext) throws Exception{

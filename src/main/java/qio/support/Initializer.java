@@ -31,7 +31,6 @@ public class Initializer {
         PropertyStorage propertyStorage;
 
         String[] propertyFiles;
-        ServletContext servletContext;
 
         Map<String, ObjectDetails> classes;
         EndpointProcessor endpointProcessor;
@@ -62,6 +61,7 @@ public class Initializer {
             this.propertyStorage = propertyStorage;
             return this;
         }
+
         private void sayHello(){
             System.out.println("\n\n");
             System.out.println("                 ----- ");
@@ -73,8 +73,8 @@ public class Initializer {
 
         private void runPropertiesProcessor() throws Exception {
             PropertiesProcessor propertiesProcessor = new PropertiesProcessor.Builder()
-                    .withFiles(propertyFiles)
-                    .withContext(servletContext)
+                    .withFiles(qio.getPropertiesFiles())
+                    .withQio(qio)
                     .process();
             this.propertyStorage = propertiesProcessor.getPropertiesData();
         }

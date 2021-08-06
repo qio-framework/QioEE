@@ -17,7 +17,7 @@ public class HttpMediator extends HttpServlet {
     @Override
     public void init(ServletConfig config) {
         ServletContext context = config .getServletContext();
-        EndpointMappings endpointMappings = (EndpointMappings) context.getAttribute(Qio.HTTP_MAPPINGS);
+        EndpointMappings endpointMappings = (EndpointMappings) context.getAttribute(Qio.ENDPOINT_MAPPINGS);
         String[] resources = (String[]) context.getAttribute(Qio.HTTP_RESOURCES);
         requestModulator = new RequestModulator(resources, endpointMappings);
     }
