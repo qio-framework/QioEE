@@ -24,13 +24,10 @@ public class Initializer {
     public static class Builder {
 
         Qio qio;
-        Object qioEvents;
         String[] resources;
         ElementStorage elementStorage;
         ElementProcessor elementProcessor;
         PropertyStorage propertyStorage;
-
-        String[] propertyFiles;
 
         Map<String, ObjectDetails> classes;
         EndpointProcessor endpointProcessor;
@@ -172,7 +169,9 @@ public class Initializer {
         }
 
         private void dispatchEvent() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-            if(qioEvents != null) {
+            System.out.println("qoievents:"+ qio.getQioEvents());
+            if(qio.getQioEvents() != null) {
+                Object qioEvents = qio.getQioEvents();
                 Method setupComplete = qioEvents.getClass().getDeclaredMethod("setupComplete", Qio.class);
                 if(setupComplete != null) {
                     setupComplete.setAccessible(true);

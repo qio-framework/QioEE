@@ -41,6 +41,7 @@ public class Qio {
     public Boolean devMode;
     public ServletContext servletContext;
 
+    Object qioEvents;
     String[] resources;
     String[] propertiesFiles;
 
@@ -70,6 +71,7 @@ public class Qio {
                 .withPropertyStorage(propertyStorage)
                 .initialize()
                 .build();
+
     }
     
     public Object getElement(String name){
@@ -449,6 +451,14 @@ public class Qio {
 
     public String[] getPropertiesFiles(){
         return this.propertiesFiles;
+    }
+
+    public void setQioEvents(Object qioEvents){
+        this.qioEvents = qioEvents;
+    }
+
+    public Object getQioEvents(){
+        return this.qioEvents;
     }
 
     public static String getResourceUri(ServletContext servletContext) throws Exception{

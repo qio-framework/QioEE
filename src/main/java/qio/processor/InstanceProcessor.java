@@ -15,18 +15,13 @@ import java.util.Map;
 public class InstanceProcessor {
 
     Qio qio;
-    Object qioEvents;
     Map<String, ObjectDetails> classes;
 
     public InstanceProcessor(Builder builder){
         this.qio = builder.qio;
-        this.qioEvents = builder.qioEvents;
         this.classes = builder.classes;
     }
 
-    public Object getQioEvents(){
-        return qioEvents;
-    }
     public Map<String, ObjectDetails> getClasses() {
         return classes;
     }
@@ -34,10 +29,7 @@ public class InstanceProcessor {
     public static class Builder{
 
         Qio qio;
-        Object qioEvents;
         ClassLoader loader;
-        Boolean runEmbedded;
-        ServletContext servletContext;
         Map<String, ObjectDetails> classes;
 
         public Builder(){
@@ -103,7 +95,7 @@ public class InstanceProcessor {
                     objectDetails.setObject(object);
 
                     if(cls.isAnnotationPresent(Events.class)){
-                        this.qioEvents = object;
+                        qio.setQioEvents(object);
                     }
 
                     classes.put(objectDetails.getName(), objectDetails);
