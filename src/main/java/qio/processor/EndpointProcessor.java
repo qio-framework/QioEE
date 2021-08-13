@@ -1,11 +1,11 @@
 package qio.processor;
 
+import qio.Qio;
 import qio.annotate.Variable;
 import qio.annotate.verbs.Delete;
 import qio.annotate.verbs.Get;
 import qio.annotate.verbs.Post;
 import qio.annotate.verbs.Put;
-import qio.storage.ElementStorage;
 import qio.model.support.ObjectDetails;
 import qio.model.web.EndpointMapping;
 import qio.model.web.EndpointMappings;
@@ -23,15 +23,13 @@ public class EndpointProcessor {
     public static final String PUT    = "Put";
     public static final String DELETE = "Delete";
 
-    ElementProcessor elementProcessor;
-    ElementStorage elementStorage;
+    Qio qio;
+
     Map<String, ObjectDetails> processed;
     EndpointMappings endpointMappings;
 
-    public EndpointProcessor(ElementStorage elementStorage,
-                             ElementProcessor elementProcessor){
-        this.elementStorage = elementStorage;
-        this.elementProcessor = elementProcessor;
+    public EndpointProcessor(Qio qio){
+        this.qio = qio;
         this.processed = new HashMap<>();
         this.endpointMappings = new EndpointMappings();
     }
@@ -44,11 +42,11 @@ public class EndpointProcessor {
     }
 
     private boolean allAnnotationsProcessed(){
-        return this.processed.size() == this.elementProcessor.getHttpClasses().size();
+        return this.processed.size() == qio.getElementProcessor().getHttpClasses().size();
     }
 
     private void processWebAnnotations() throws Exception{
-        for(Map.Entry<String, ObjectDetails> entry : this.elementProcessor.getHttpClasses().entrySet()){
+        for(Map.Entry<String, ObjectDetails> entry : qio.getElementProcessor().getHttpClasses().entrySet()){
             Class clazz = entry.getValue().getClazz();
             Method[] methods = clazz.getDeclaredMethods();
             for(Method method: methods){

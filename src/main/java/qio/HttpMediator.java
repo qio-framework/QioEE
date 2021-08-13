@@ -1,14 +1,16 @@
 package qio;
 
-import qio.processor.EndpointProcessor;
-import qio.web.RequestModulator;
-import qio.model.web.EndpointMappings;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import qio.model.Element;
+import qio.processor.EndpointProcessor;
+import qio.web.RequestModulator;
+import qio.model.web.EndpointMappings;
+
+
 
 public class HttpMediator extends HttpServlet {
 
@@ -16,10 +18,10 @@ public class HttpMediator extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) {
-        ServletContext context = config .getServletContext();
-        EndpointMappings endpointMappings = (EndpointMappings) context.getAttribute(Qio.ENDPOINT_MAPPINGS);
-        String[] resources = (String[]) context.getAttribute(Qio.HTTP_RESOURCES);
-        requestModulator = new RequestModulator(resources, endpointMappings);
+        ServletContext servletContext = config .getServletContext();
+        Element element = (Element) servletContext.getAttribute(Qio.QIO);
+        Qio qio = (Qio)element.getElement();
+        requestModulator = new RequestModulator(qio);
     }
 
     protected void handle(String verb, HttpServletRequest req, HttpServletResponse resp) {

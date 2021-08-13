@@ -15,18 +15,12 @@ import java.util.Map;
 
 public class AnnotationProcessor {
 
-    ElementStorage elementStorage;
-    ElementProcessor elementProcessor;
-    PropertyStorage propertyStorage;
+    Qio qio;
     Map<String, ObjectDetails> processed;
     List<ObjectDetails> annotations;
 
-    public AnnotationProcessor(ElementStorage elementStorage,
-                               ElementProcessor elementProcessor,
-                               PropertyStorage propertyStorage){
-        this.elementStorage = elementStorage;
-        this.elementProcessor = elementProcessor;
-        this.propertyStorage = propertyStorage;
+    public AnnotationProcessor(Qio qio){
+        this.qio = qio;
         this.processed = new HashMap<>();
         this.annotations = new ArrayList<>();
         map();
@@ -54,8 +48,8 @@ public class AnnotationProcessor {
             for(Field field: fields) {
                 if(field.isAnnotationPresent(Inject.class)) {
                     String fieldKey = field.getName().toLowerCase();
-                    if(elementStorage.getElements().containsKey(fieldKey)){
-                        Object element = elementStorage.getElements().get(fieldKey).getElement();
+                    if(qio.getElementStorage().getElements().containsKey(fieldKey)){
+                        Object element = qio.getElementStorage().getElements().get(fieldKey).getElement();
                         field.setAccessible(true);
                         field.set(object, element);
                         processedFieldsCount++;
@@ -68,8 +62,8 @@ public class AnnotationProcessor {
                     Property annotation = field.getAnnotation(Property.class);
                     String key = annotation.value();
 
-                    if(propertyStorage.getProperties().containsKey(key)){
-                        String value = propertyStorage.getProperties().get(key);
+                    if(qio.getPropertyStorage().getProperties().containsKey(key)){
+                        String value = qio.getPropertyStorage().getProperties().get(key);
                         field.setAccessible(true);
                         field.set(object, value);
 
@@ -106,14 +100,13 @@ public class AnnotationProcessor {
     }
 
     private void map(){
-        for(Map.Entry<String, ObjectDetails> entry: this.elementProcessor.getAnnotatedClasses().entrySet()){
+        for(Map.Entry<String, ObjectDetails> entry: qio.getElementProcessor().getAnnotatedClasses().entrySet()){
             ObjectDetails objectDetails = entry.getValue();
             if(!annotations.contains(objectDetails))annotations.add(objectDetails);
         }
     }
 
-
     protected Boolean allAnnotationsProcessed(){
-        return this.processed.size() == this.elementProcessor.getAnnotatedClasses().size();
+        return this.processed.size() == qio.getElementProcessor().getAnnotatedClasses().size();
     }
 }

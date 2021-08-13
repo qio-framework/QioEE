@@ -1,94 +1,68 @@
 package qio.processor;
 
-import qio.storage.PropertyStorage;
 import qio.Qio;
 
-import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import static qio.Qio.command;
+
 public class PropertiesProcessor {
 
-    PropertyStorage propertyStorage;
+    Qio qio;
 
-    public PropertiesProcessor(Builder builder){
-        this.propertyStorage = builder.propertyStorage;
+    public PropertiesProcessor(Qio qio){
+        this.qio = qio;
     }
 
-    public PropertyStorage getPropertiesData(){
-        return this.propertyStorage;
+    protected File getPropertiesFile(String propertyFile) throws Exception{
+        String resourceUri = qio.getResourceUri();
+        File file = new File(resourceUri + File.separator + propertyFile);
+        if(!file.exists()) {
+            throw new Exception(propertyFile.concat(" properties file cannot be located..."));
+        }
+        return file;
     }
 
-    public static class Builder{
+    public void run() throws IOException {
+        command(Qio.PROCESS + " resolving properties");
 
-        Qio qio;
-        String[] propertiesFiles;
-        PropertyStorage propertyStorage;
+        if (qio.getPropertiesFiles() != null) {
 
-        public Builder(){
-            this.propertiesFiles = new String[]{};
-            this.propertyStorage = new PropertyStorage();
-        }
-        public Builder withQio(Qio qio){
-            this.qio = qio;
-            return this;
-        }
-        public Builder withFiles(String[] propertiesFiles){
-            this.propertiesFiles = propertiesFiles;
-            return this;
-        }
+            for (String propertyFile : qio.getPropertiesFiles()) {
+                FileInputStream fis = null;
+                Properties prop = null;
+                try {
 
-        protected File getPropertiesFile(String propertyFile) throws Exception{
-            String resourceUri = qio.getResourceUri();
-            File file = new File(resourceUri + File.separator + propertyFile);
-            if(!file.exists()) {
-                throw new Exception(propertyFile.concat(" properties file cannot be located..."));
-            }
-            return file;
-        }
+                    File file = getPropertiesFile(propertyFile);
+                    fis = new FileInputStream(file);
+                    prop = new Properties();
+                    prop.load(fis);
 
-        protected void traversePropertiesData() throws Exception{
+                    Enumeration properties = prop.propertyNames();
+                    while (properties.hasMoreElements()) {
+                        String key = (String) properties.nextElement();
+                        String value = prop.getProperty(key);
+                        qio.getPropertyStorage().getProperties().put(key, value);
+                    }
 
-            System.out.println(Qio.SIGNATURE + " resolving properties");
-            if(propertiesFiles != null) {
-
-                for (String propertyFile : propertiesFiles) {
-                    FileInputStream fis = null;
-                    Properties prop = null;
-                    try {
-                        File file = getPropertiesFile(propertyFile);
-                        fis = new FileInputStream(file);
-                        prop = new Properties();
-                        prop.load(fis);
-
-                        Enumeration properties = prop.propertyNames();
-                        while (properties.hasMoreElements()) {
-                            String key = (String) properties.nextElement();
-                            String value = prop.getProperty(key);
-                            propertyStorage.getProperties().put(key, value);
-                        }
-                    } catch (FileNotFoundException fnfe) {
-                        fnfe.printStackTrace();
-                    } catch (IOException ioe) {
-                        ioe.printStackTrace();
-                    } finally {
-                        if (fis != null) {
-                            fis.close();
-                        }
+                } catch (FileNotFoundException fnfe) {
+                    fnfe.printStackTrace();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                } finally {
+                    if (fis != null) {
+                        fis.close();
                     }
                 }
             }
 
-        }
-
-        public PropertiesProcessor process() throws Exception{
-            traversePropertiesData();
-            return new PropertiesProcessor(this);
         }
 
     }

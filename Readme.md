@@ -2,15 +2,15 @@
 
 <img src="http://qioframework.io/media/qio-screen.png" width="390px"/>
 
-
-Qio is a full-fledged Java Web Framework. It is Java EE ready not Jakarta EE. 
+Qio is a full-fledged Java Web Framework. 
+It is built around the Java EE specification. 
 
 ## Getting Started
 
 1. Download the starter application
 
 ```
-git clone https://github.com/qio-framework/QioStarter.git
+git clone https://github.com/qio-framework/QioJavaEEStarter.git
 ```
 
 2. then run:
@@ -19,11 +19,12 @@ git clone https://github.com/qio-framework/QioStarter.git
 mvn package jetty:run
 ```
 
-3. finaly browse to : 
+3. finally browse to : 
 
 ```
 http://localhost:3000/q
 ```
+
 
 
 ### What a HttpHandler looks like:

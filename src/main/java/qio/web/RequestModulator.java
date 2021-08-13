@@ -1,12 +1,12 @@
 package qio.web;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import qio.Qio;
 import qio.annotate.JsonOutput;
 import qio.model.web.*;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -18,12 +18,10 @@ import java.util.regex.Pattern;
 
 public class RequestModulator {
 
-    String[] resources;
-    EndpointMappings endpointMappings;
+    Qio qio;
 
-    public RequestModulator(String[] resources, EndpointMappings endpointMappings){
-        this.resources = resources;
-        this.endpointMappings = endpointMappings;
+    public RequestModulator(Qio qio){
+        this.qio = qio;
     }
 
     public boolean handle(String verb, HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -34,7 +32,7 @@ public class RequestModulator {
 
         String uri = getUri(req);
 
-        if(StaticResource.isResource(uri, resources)){
+        if(StaticResource.isResource(uri, qio.getResources())){
             StaticResource staticResource = new StaticResource(uri, servletContext, resp);
             staticResource.serve();
             return true;
@@ -83,14 +81,14 @@ public class RequestModulator {
             }
 
         }catch(ClassCastException ccex){
-            Qio.Injector.badge();
+            qio.sign();
             System.out.println("");
             System.out.println("Attempted to cast an object at the data layer with an incorrect Class type.");
             System.out.println("");
             ccex.printStackTrace();
         }catch (Exception ex){
             System.out.println("");
-            System.out.println(Qio.SIGNATURE + "   " +  endpointMapping.getVerb() + " :: " + endpointMapping.getPath());
+            System.out.println(Qio.PROCESS + "   " +  endpointMapping.getVerb() + " :: " + endpointMapping.getPath());
             System.out.println("");
             ex.printStackTrace();
         }
@@ -194,9 +192,8 @@ public class RequestModulator {
 
     protected EndpointMapping getHttpMapping(String verb, String uri){
         EndpointMapping endpointMapping = null;
-        for (Map.Entry<String, EndpointMapping> mappingEntry : endpointMappings.getMappings().entrySet()) {
+        for (Map.Entry<String, EndpointMapping> mappingEntry : qio.getEndpointMappings().getMappings().entrySet()) {
             EndpointMapping mapping = mappingEntry.getValue();
-//            System.out.println(uri + "         ::::::::     " + mapping.getRegexedPath());
             Matcher matcher = Pattern.compile(mapping.getRegexedPath())
                     .matcher(uri);
             if(matcher.matches() &&

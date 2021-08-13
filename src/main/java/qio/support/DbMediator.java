@@ -1,11 +1,19 @@
 package qio.support;
 
 import qio.Qio;
-import qio.jdbc.BasicDataSource;
 import org.h2.tools.RunScript;
+import qio.model.Element;
+
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileReader;
+import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
 import java.sql.Connection;
+import java.util.Set;
+
+import static qio.Qio.DATASOURCE;
+import static qio.Qio.command;
 
 public class DbMediator {
 
@@ -17,12 +25,24 @@ public class DbMediator {
 
     public Boolean createDb() throws Exception {
 
-        String artifactPath = qio.getResourceUri();
+        String artifactPath = Qio.getResourceUri(qio.servletContext);
+        File createFile = new File(artifactPath + File.separator + qio.getDbScript());
 
-        File createFile = new File(artifactPath + File.separator + "create-db.sql");
+        DataSource datasource = (DataSource) qio.getElement(DATASOURCE);
 
-        BasicDataSource dataSource = (BasicDataSource) Qio.z.get(Qio.DATASOURCE).getElement();
-        Connection conn = dataSource.getConnection();
+        if(datasource == null){
+            command("\n");
+            throw new Exception("\n\n           " +
+                    "You have qio.dev set to true in qio.props.\n           " +
+                    "In addition you need to configure a datasource. \n           " +
+                    "Feel free to use qio.jdbc.BasicDataSource to " +
+                    "get started.\n" +
+                    "           " +
+                    "You can also checkout HikariCP, it is pretty good!" +
+                    "\n\n" +
+                    "           https://github.com/brettwooldridge/HikariCP\n\n\n");
+        }
+        Connection conn = datasource.getConnection();
         RunScript.execute(conn, new FileReader(createFile));
         conn.commit();
         conn.close();
@@ -31,34 +51,37 @@ public class DbMediator {
     }
 
     public Boolean dropDb() {
-        System.out.println("\n\n");
-        System.out.println("");
-        System.out.println("               " + Qio.BLUE + "  Qio " + Qio.BLACK);
-        System.out.println("                ----- ");
-        System.out.println("           cleaning dev env...");
-        System.out.println("\n\n\n\n");
+        command("\n\n\n\n\n\n\n\n        //| " + Qio.BLUE + " Q" +
+                Qio.BLACK + "io  cleaning dev env...\n");
 
-        if(qio.inDevMode()) {
-            BasicDataSource dataSource = (BasicDataSource) Qio.z.get(Qio.DATASOURCE).getElement();
-            String[] dbParts = dataSource.getDbUrl().split("jdbc:h2:");
+        try {
 
-            String dbPath = dbParts[1];
-            if (dbPath.startsWith("~" + File.separator)) {
-                dbPath = System.getProperty("user.home") + dbPath.substring(1);
+            DataSource datasource = (DataSource) qio.getElement(DATASOURCE);
+            Connection conn = datasource.getConnection();
+
+            File dropFile = new File("tmp-qio.sql");
+            if(dropFile.exists()){
+               dropFile.delete();
             }
 
-            File dbMvFile = new File(dbPath + ".mv.db");
-            if(dbMvFile.exists()){
-                dbMvFile.delete();
-            }
-            File dbTraceFile = new File(dbPath + ".trace.db");
-            if(dbTraceFile.exists()){
-                dbTraceFile.delete();
-            }
+            dropFile.canWrite();
+            dropFile.createNewFile();
+
+            PrintWriter printWriter = new PrintWriter(dropFile);
+            printWriter.print("drop all objects;");
+            printWriter.close();
+
+            RunScript.execute(conn, new FileReader(dropFile));
+            conn.commit();
+            conn.close();
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         return true;
     }
 
 }
-
 

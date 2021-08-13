@@ -16,11 +16,7 @@ import java.util.*;
 
 public class ConfigurationProcessor {
 
-    ElementStorage elementStorage;
-    ElementProcessor elementProcessor;
-    PropertyStorage propertyStorage;
-
-    List<Class> unprocessedConfigs;
+    Qio qio;
 
     Map<String, MethodFeature> methods;
     List<MethodFeature> iterableMethods;
@@ -28,13 +24,8 @@ public class ConfigurationProcessor {
 
     Map<String, Integer> issues;
 
-    public ConfigurationProcessor(ElementStorage elementStorage,
-                                  ElementProcessor elementProcessor,
-                                  PropertyStorage propertyStorage) throws Exception{
-        this.unprocessedConfigs = elementProcessor.getConfigs();
-        this.elementProcessor = elementProcessor;
-        this.propertyStorage = propertyStorage;
-        this.elementStorage = elementStorage;
+    public ConfigurationProcessor(Qio qio) throws Exception{
+        this.qio = qio;
         this.methods = new HashMap<>();
         this.processedMethods = new HashSet();
         this.iterableMethods = new ArrayList<>();
@@ -51,7 +42,7 @@ public class ConfigurationProcessor {
     }
 
     protected void process(int idx) throws Exception{
-        Integer classCount = elementProcessor.getClasses().size();
+        Integer classCount = qio.getObjects().size();
 
         if(idx > iterableMethods.size()) idx = 0;
 
@@ -66,15 +57,14 @@ public class ConfigurationProcessor {
                 Object dependency = method.invoke(object);
                 String clsName = Qio.getName(dependency.getClass().getName());
 
-                if(elementProcessor.getClasses().get(clsName) != null){
-                    elementProcessor.getClasses().get(clsName).setObject(dependency);
+                if(qio.getObjects().get(clsName) != null){
+                    qio.getObjects().get(clsName).setObject(dependency);
                 }else {
                     ObjectDetails objectDetails = new ObjectDetails();
                     objectDetails.setClazz(dependency.getClass());
                     objectDetails.setName(clsName);
-//                    objectDetails.setPath(dependency.getClass().getName());
                     objectDetails.setObject(dependency);
-                    elementProcessor.getClasses().put(clsName, objectDetails);
+                    qio.getObjects().put(clsName, objectDetails);
                 }
 
                 createAddElement(method, dependency);
@@ -120,11 +110,11 @@ public class ConfigurationProcessor {
         Element element = new Element();
         element.setElement(object);
         String classKey = Qio.getName(method.getName());
-        this.elementStorage.getElements().put(classKey, element);
+        qio.getElementStorage().getElements().put(classKey, element);
     }
 
     protected void setMapDependencyMethods() throws Exception {
-        for(Class config : unprocessedConfigs){
+        for(Class config : qio.getElementProcessor().getConfigs()){
 
             Object object = null;
             Constructor[] constructors = config.getConstructors();
@@ -143,14 +133,14 @@ public class ConfigurationProcessor {
                         throw new Exception("More than one dependency with the same name defined : " + method.getName());
                     }
 
-                    if(elementStorage.getElements().containsKey(methodKey)){
+                    if(qio.getElementStorage().getElements().containsKey(methodKey)){
                         System.out.println("\n\n");
                         System.out.println("Warning: you elements being injected twice, once by configuration, the other via @Inject.");
                         System.out.println("Take a look at " + config.getName() + " and @Inject for " + method.getName());
                         System.out.println("\n\n");
-                        Element existingElement = elementStorage.getElements().get(methodKey);
+                        Element existingElement = qio.getElementStorage().getElements().get(methodKey);
                         existingElement.setElement(object);
-                        elementStorage.getElements().replace(methodKey, existingElement);
+                        qio.getElementStorage().getElements().replace(methodKey, existingElement);
                     }
 
                     MethodFeature methodFeature = new MethodFeature();
@@ -166,10 +156,10 @@ public class ConfigurationProcessor {
                 if(field.isAnnotationPresent(Property.class)){
                     Property property = field.getAnnotation(Property.class);
                     String key = property.value();
-                    if(!propertyStorage.getProperties().containsKey(key)){
+                    if(!qio.getPropertyStorage().getProperties().containsKey(key)){
                         throw new Exception(key + " property is missing");
                     }
-                    String value = propertyStorage.getProperties().get(key);
+                    String value = qio.getPropertyStorage().getProperties().get(key);
                     field.setAccessible(true);
                     field.set(object, value);
                 }

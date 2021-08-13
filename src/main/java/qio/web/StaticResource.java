@@ -2,6 +2,7 @@ package qio.web;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
@@ -52,14 +53,13 @@ public class StaticResource {
         }
     }
 
-    protected static Boolean isResource(String uri, String[] resources){
+    protected static Boolean isResource(String uri, List<String> resources){
         if(resources == null) return false;
 
         String[] parts = uri.split("/");
         if(parts.length > 1) {
             String asset = parts[1];
-            List<String> resourceList = Arrays.asList(resources);
-            if (resourceList.contains(asset)) return true;
+            if (resources.contains(asset)) return true;
         }
         return false;
     }
