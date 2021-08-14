@@ -60,7 +60,7 @@ public class DbMediator {
             DataSource datasource = (DataSource) qio.getElement(DATASOURCE);
             Connection conn = datasource.getConnection();
 
-            RunScript.execute(conn, new StringReader("drop all objects;")));
+            RunScript.execute(conn, new StringReader("drop all objects;"));
             conn.commit();
             conn.close();
 
