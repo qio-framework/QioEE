@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.sql.Connection;
 import java.util.Set;
@@ -59,22 +60,9 @@ public class DbMediator {
             DataSource datasource = (DataSource) qio.getElement(DATASOURCE);
             Connection conn = datasource.getConnection();
 
-            File dropFile = new File("tmp-qio.sql");
-            if(dropFile.exists()){
-               dropFile.delete();
-            }
-
-            dropFile.canWrite();
-            dropFile.createNewFile();
-
-            PrintWriter printWriter = new PrintWriter(dropFile);
-            printWriter.print("drop all objects;");
-            printWriter.close();
-
-            RunScript.execute(conn, new FileReader(dropFile));
+            RunScript.execute(conn, new StringReader("drop all objects;")));
             conn.commit();
             conn.close();
-
 
         } catch (Exception e) {
             e.printStackTrace();
