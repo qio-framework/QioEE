@@ -10,7 +10,7 @@ It is built around the Java EE specification.
 1. Download the starter application
 
 ```
-git clone https://github.com/qio-framework/QioJavaEEStarter.git
+git clone https://github.com/qio-framework/QioEEStarter.git
 ```
 
 2. then run:
