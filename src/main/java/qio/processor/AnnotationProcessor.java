@@ -2,12 +2,12 @@ package qio.processor;
 
 import qio.annotate.Inject;
 import qio.annotate.Property;
-import qio.storage.ElementStorage;
-import qio.storage.PropertyStorage;
 import qio.model.support.ObjectDetails;
 import qio.Qio;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +55,6 @@ public class AnnotationProcessor {
                         processedFieldsCount++;
                     }else{
                         processAnnotations(z + 1);
-                        //    throw new Exception(field.getName() + " is missing on " + object.getClass().getName());
                     }
                 }
                 if(field.isAnnotationPresent(Property.class)){
@@ -63,10 +62,9 @@ public class AnnotationProcessor {
                     String key = annotation.value();
 
                     if(qio.getPropertyStorage().getProperties().containsKey(key)){
-                        String value = qio.getPropertyStorage().getProperties().get(key);
                         field.setAccessible(true);
-                        field.set(object, value);
-
+                        String value = qio.getPropertyStorage().getProperties().get(key);
+                        attachValue(field, object, value);
                         processedFieldsCount++;
                     }else{
                         processAnnotations(z + 1);
@@ -82,6 +80,30 @@ public class AnnotationProcessor {
                 String key = Qio.getName(objectDetails.getName());
                 processed.put(key, objectDetails);
             }
+        }
+    }
+
+    protected void attachValue(Field field, Object object, String stringValue) throws Exception{
+        Type type = field.getType();
+        if(type.getTypeName().equals("boolean") || type.getTypeName().equals("java.lang.Boolean")){
+            Boolean value = Boolean.valueOf(stringValue);
+            field.set(object, value);
+        }
+        if(type.getTypeName().equals("int") || type.getTypeName().equals("java.lang.Integer")){
+            Integer value = Integer.valueOf(stringValue);
+            field.set(object, value);
+        }
+        if(type.getTypeName().equals("float") || type.getTypeName().equals("java.lang.Float")){
+            Float value = Float.valueOf(stringValue);
+            field.set(object, value);
+        }
+        if(type.getTypeName().equals("double") || type.getTypeName().equals("java.lang.Double")){
+            Double value = Double.valueOf(stringValue);
+            field.set(object, value);
+        }
+        if(type.getTypeName().equals("java.math.BigDecimal")){
+            BigDecimal value = new BigDecimal(stringValue);
+            field.set(object, value);
         }
     }
 
