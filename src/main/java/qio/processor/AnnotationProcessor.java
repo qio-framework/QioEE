@@ -85,6 +85,9 @@ public class AnnotationProcessor {
 
     protected void attachValue(Field field, Object object, String stringValue) throws Exception{
         Type type = field.getType();
+        if(type.getTypeName().equals("java.lang.String")){
+            field.set(object, stringValue);
+        }
         if(type.getTypeName().equals("boolean") || type.getTypeName().equals("java.lang.Boolean")){
             Boolean value = Boolean.valueOf(stringValue);
             field.set(object, value);
