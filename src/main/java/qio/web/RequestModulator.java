@@ -230,9 +230,7 @@ public class RequestModulator {
 
     protected static void badge(HttpServletResponse resp) throws Exception{
         resp.getWriter().println("");
-        resp.getWriter().println("       ------  ");
-        resp.getWriter().println("     (   Qio   )");
-        resp.getWriter().println("       ------  ");
+        resp.getWriter().println("\n//|  Qio  \\\\\\\\\\\\\n");
         resp.getWriter().println("");
     }
 
