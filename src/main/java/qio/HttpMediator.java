@@ -2,6 +2,7 @@ package qio;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,8 +11,7 @@ import qio.processor.EndpointProcessor;
 import qio.web.RequestModulator;
 import qio.model.web.EndpointMappings;
 
-
-
+@MultipartConfig
 public class HttpMediator extends HttpServlet {
 
     RequestModulator requestModulator;

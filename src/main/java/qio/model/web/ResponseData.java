@@ -11,6 +11,9 @@ public class ResponseData {
         this.data = new HashMap<>();
     }
 
+    public void set(String key, Object value){
+        this.data.put(key, value);
+    }
     public void put(String key, Object value){
         this.data.put(key, value);
     }

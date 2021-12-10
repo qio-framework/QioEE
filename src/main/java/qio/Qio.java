@@ -66,7 +66,7 @@ public class Qio {
         this.elementStorage = elementStorage;
     }
 
-    public Qio(Injector injector) throws Exception{
+    public Qio(Injector injector) throws Exception {
         this.dbScript = "create-db.sql";
         this.devMode = injector.devMode;
         this.servletContext = injector.servletContext;
@@ -82,9 +82,9 @@ public class Qio {
     }
 
     public Object getElement(String name){
-        String elementName = name.toLowerCase();
-        if(elementStorage.getElements().containsKey(elementName)){
-            return elementStorage.getElements().get(elementName).getElement();
+        String key = name.toLowerCase();
+        if(elementStorage.getElements().containsKey(key)){
+            return elementStorage.getElements().get(key).getElement();
         }
         return null;
     }
@@ -238,6 +238,7 @@ public class Qio {
     public boolean delete(String preSql, Object[] params){
         try {
             String sql = hydrateSql(preSql, params);
+
             Connection connection = dataSource.getConnection();
             Statement stmt = connection.createStatement();
             stmt.execute(sql);
@@ -316,6 +317,96 @@ public class Qio {
         return false;
     }
 
+    public Object set(HttpServletRequest req, Class cls){
+        Object object =  null;
+        try {
+            object = cls.getConstructor().newInstance();
+            Field[] fields = cls.getDeclaredFields();
+            for(Field field : fields){
+
+                String value = req.getParameter(field.getName());
+                if(value != null &&
+                        !value.equals("")){
+
+                    field.setAccessible(true);
+
+                    Type type = field.getType();
+
+                    if (type.getTypeName().equals("int") || type.getTypeName().equals("java.lang.Integer")) {
+                        field.set(object, Integer.valueOf(value));
+                    }
+                    else if (type.getTypeName().equals("double") || type.getTypeName().equals("java.lang.Double")) {
+                        field.set(object, Double.valueOf(value));
+                    }
+                    else if (type.getTypeName().equals("float") || type.getTypeName().equals("java.lang.Float")) {
+                        field.set(object, Float.valueOf(value));
+                    }
+                    else if (type.getTypeName().equals("long") || type.getTypeName().equals("java.lang.Long")) {
+                        field.set(object, Long.valueOf(value));
+                    }
+                    else if (type.getTypeName().equals("boolean") || type.getTypeName().equals("java.lang.Boolean")) {
+                        field.set(object, Boolean.valueOf(value));
+                    }
+                    else if (type.getTypeName().equals("java.math.BigDecimal")) {
+                        field.set(object, new BigDecimal(value));
+                    }
+                    else if (type.getTypeName().equals("java.lang.String")) {
+                        field.set(object, value);
+                    }
+                }
+            }
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+        return object;
+    }
+
+    public static Object get(HttpServletRequest req, Class cls){
+        Object object =  null;
+        try {
+            object = cls.getConstructor().newInstance();
+            Field[] fields = cls.getDeclaredFields();
+            for(Field field : fields){
+
+                String value = req.getParameter(field.getName());
+                if(value != null &&
+                        !value.equals("")){
+
+                    field.setAccessible(true);
+
+                    Type type = field.getType();
+
+                    if (type.getTypeName().equals("int") || type.getTypeName().equals("java.lang.Integer")) {
+                        field.set(object, Integer.valueOf(value));
+                    }
+                    else if (type.getTypeName().equals("double") || type.getTypeName().equals("java.lang.Double")) {
+                        field.set(object, Double.valueOf(value));
+                    }
+                    else if (type.getTypeName().equals("float") || type.getTypeName().equals("java.lang.Float")) {
+                        field.set(object, Float.valueOf(value));
+                    }
+                    else if (type.getTypeName().equals("long") || type.getTypeName().equals("java.lang.Long")) {
+                        field.set(object, Long.valueOf(value));
+                    }
+                    else if (type.getTypeName().equals("boolean") || type.getTypeName().equals("java.lang.Boolean")) {
+                        field.set(object, Boolean.valueOf(value));
+                    }
+                    else if (type.getTypeName().equals("java.math.BigDecimal")) {
+                        field.set(object, new BigDecimal(value));
+                    }
+                    else if (type.getTypeName().equals("java.lang.String")) {
+                        field.set(object, value);
+                    }
+                }
+            }
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+        return object;
+    }
+
     public static Object hydrate(HttpServletRequest req, Class cls){
         Object object =  null;
         try {
@@ -332,19 +423,19 @@ public class Qio {
                     Type type = field.getType();
 
                     if (type.getTypeName().equals("int") || type.getTypeName().equals("java.lang.Integer")) {
-                        field.set(object, Integer.parseInt(value));
+                        field.set(object, Integer.valueOf(value));
                     }
                     else if (type.getTypeName().equals("double") || type.getTypeName().equals("java.lang.Double")) {
-                        field.set(object, Double.parseDouble(value));
+                        field.set(object, Double.valueOf(value));
                     }
                     else if (type.getTypeName().equals("float") || type.getTypeName().equals("java.lang.Float")) {
-                        field.set(object, Float.parseFloat(value));
+                        field.set(object, Float.valueOf(value));
                     }
                     else if (type.getTypeName().equals("long") || type.getTypeName().equals("java.lang.Long")) {
-                        field.set(object, Long.parseLong(value));
+                        field.set(object, Long.valueOf(value));
                     }
                     else if (type.getTypeName().equals("boolean") || type.getTypeName().equals("java.lang.Boolean")) {
-                        field.set(object, Boolean.getBoolean(value));
+                        field.set(object, Boolean.valueOf(value));
                     }
                     else if (type.getTypeName().equals("java.math.BigDecimal")) {
                         field.set(object, new BigDecimal(value));
@@ -395,7 +486,7 @@ public class Qio {
             return this;
         }
 
-        public Qio inject() throws Exception{
+        public Qio inject() throws Exception {
             return new Qio(this);
         }
     }
@@ -502,7 +593,7 @@ public class Qio {
         throw new Exception("Qio : unable to locate resource path");
     }
 
-    public String getClassesUri() throws Exception{
+    public String getClassesUri() throws Exception {
         String classesUri = Paths.get("webapps", getServletContext().getContextPath(), "WEB-INF", "classes")
                 .toAbsolutePath()
                 .toString();

@@ -5,6 +5,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import qio.Qio;
 import qio.annotate.JsonOutput;
+import qio.annotate.Media;
+import qio.annotate.Text;
 import qio.model.web.*;
 
 import java.lang.reflect.Method;
@@ -64,10 +66,18 @@ public class RequestModulator {
 
         try {
             String response = (String) method.invoke(object, parameters);
+            if(response == null) return false;
 
             if(method.isAnnotationPresent(JsonOutput.class)){
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
+                resp.getWriter().print(response);
+                resp.getWriter().flush();
+            }else if(method.isAnnotationPresent(Media.class)){
+                resp.getWriter().print(response);
+                resp.getWriter().flush();
+            }else if(method.isAnnotationPresent(Text.class)){
+                resp.setContentType("text/plain");
                 resp.getWriter().print(response);
                 resp.getWriter().flush();
             }else if(response.startsWith(Qio.HTTP_REDIRECT)){
@@ -130,8 +140,11 @@ public class RequestModulator {
     }
 
     protected String getRedirect(String response){
-        String[] redirectParts = response.split("]");
-        return redirectParts[1];
+        String[] redirectBits = response.split("]");
+        if(redirectBits.length > 1){
+            return redirectBits[1];
+        }
+        return "";
     }
 
     private Object[] getEndpointParameters(String uri,
@@ -191,46 +204,104 @@ public class RequestModulator {
     }
 
     protected EndpointMapping getHttpMapping(String verb, String uri){
-        EndpointMapping endpointMapping = null;
+
+        for (Map.Entry<String, EndpointMapping> mappingEntry : qio.getEndpointMappings().getMappings().entrySet()) {
+            EndpointMapping mapping = mappingEntry.getValue();
+
+            String mappingUri = mapping.getPath();
+            if(!mapping.getPath().startsWith("/")){
+                mappingUri = "/" + mappingUri;
+            }
+            if(mappingUri.equals(uri)){
+                return mapping;
+            }
+        }
+
         for (Map.Entry<String, EndpointMapping> mappingEntry : qio.getEndpointMappings().getMappings().entrySet()) {
             EndpointMapping mapping = mappingEntry.getValue();
             Matcher matcher = Pattern.compile(mapping.getRegexedPath())
                     .matcher(uri);
+
+            String mappingUri = mapping.getPath();
+            if(!mapping.getPath().startsWith("/")){
+                mappingUri = "/" + mappingUri;
+            }
+
             if(matcher.matches() &&
                     mapping.getVerb().equals(verb) &&
-                        variablesMatchUp(uri, mapping)){
-                endpointMapping = mapping;
-                break;
+                        variablesMatchUp(uri, mapping) &&
+                            lengthMatches(uri, mappingUri)
+                ){
+                return mapping;
             }
         }
-        return endpointMapping;
+
+        return null;
+    }
+
+    protected boolean lengthMatches(String uri, String mappingUri){
+        String[] uriBits = uri.split("/");
+        String[] mappingBits = mappingUri.split("/");
+//        System.out.println((uriBits.length == mappingBits.length) + ":" + uri + ":" + mappingUri);
+        return uriBits.length == mappingBits.length;
     }
 
     protected boolean variablesMatchUp(String uri, EndpointMapping endpointMapping){
-        List<String> parts = Arrays.asList(uri.split("/"));
+        List<String> bits = Arrays.asList(uri.split("/"));
 
-        for(int z = 0; z < endpointMapping.getTypeDetails().size(); z++){
-            try{
-                TypeFeature typeDetail = endpointMapping.getTypeDetails().get(z);
-                int position = endpointMapping.getVariablePositions().get(z);
-                String pathPart = parts.get(position);
-                String type = typeDetail.getType();
+        UrlBitFeatures urlBitFeatures = endpointMapping.getUrlBitFeatures();
+        List<UrlBit> urlBits = urlBitFeatures.getUrlBits();
 
-                if(type.equals("java.lang.Integer")){
-                    Integer.parseInt(pathPart);
-                }else if(type.equals("java.lang.Long")){
-                    Long.parseLong(pathPart);
+        Class[] typeParameters = endpointMapping.getMethod().getParameterTypes();
+        List<String> parameterTypes = getParameterTypes(typeParameters);
+
+        int idx = 0;
+        for(int q = 0; q < urlBits.size(); q++){
+            UrlBit urlBit = urlBits.get(q);
+            if(urlBit.isVariable()){
+
+                try {
+                    String methodType = parameterTypes.get(idx);
+                    String bit = bits.get(q);
+                    if (!bit.equals("")) {
+
+
+                        if (methodType.equals("java.lang.Integer")) {
+                            Integer.parseInt(bit);
+                        }
+                        if(methodType.equals("java.lang.Long")){
+                            Long.parseLong(bit);
+                        }
+                    }
+
+
+                    idx++;
+
+                }catch(Exception ex){
+                    return false;
                 }
-            }catch (Exception ex){
-                return false;
             }
         }
+
         return true;
+    }
+
+    public List<String> getParameterTypes(Class[] clsParamaters){
+        List<String> parameterTypes = new ArrayList<>();
+        for(Class cls : clsParamaters){
+            String type = cls.getTypeName();
+            if(!type.contains("HttpServletRequest") &&
+                    !type.contains("HttpServletResponse") &&
+                        !type.contains("ResponseData")){
+                parameterTypes.add(type);
+            }
+        }
+        return parameterTypes;
     }
 
     protected static void badge(HttpServletResponse resp) throws Exception{
         resp.getWriter().println("");
-        resp.getWriter().println("\n //|  Qio  \\\\\\\\\\\\\n");
+        resp.getWriter().println("\n // Qio  \\\\\\\\\\\n");
         resp.getWriter().println("");
     }
 

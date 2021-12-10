@@ -7,9 +7,7 @@ import qio.annotate.verbs.Get;
 import qio.annotate.verbs.Post;
 import qio.annotate.verbs.Put;
 import qio.model.support.ObjectDetails;
-import qio.model.web.EndpointMapping;
-import qio.model.web.EndpointMappings;
-import qio.model.web.TypeFeature;
+import qio.model.web.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -159,6 +157,21 @@ public class EndpointProcessor {
         if(endpointMappings.contains(key)){
             throw new Exception("Request path + " + path + " exists multiple times.");
         }
+
+        String[] bits = path.split("/");
+        UrlBitFeatures urlBitFeatures = new UrlBitFeatures();
+        List<UrlBit> urlBits = new ArrayList<>();
+        for(String bit : bits){
+            UrlBit urlBit = new UrlBit();
+            if(bit.contains("{{") && bit.contains("}}")){
+                urlBit.setVariable(true);
+            }else{
+                urlBit.setVariable(false);
+            }
+            urlBits.add(urlBit);
+        }
+        urlBitFeatures.setUrlBits(urlBits);
+        mapping.setUrlBitFeatures(urlBitFeatures);
 
         endpointMappings.add(key, mapping);
     }

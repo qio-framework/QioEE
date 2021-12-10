@@ -44,6 +44,7 @@ public class DbMediator {
                     "           https://github.com/brettwooldridge/HikariCP\n\n\n");
         }
         Connection conn = datasource.getConnection();
+        RunScript.execute(conn, new StringReader("drop all objects;"));
         RunScript.execute(conn, new FileReader(createFile));
         conn.commit();
         conn.close();
@@ -52,7 +53,7 @@ public class DbMediator {
     }
 
     public Boolean dropDb() {
-        command("\n\n\n\n\n\n\n\n        //| " + Qio.BLUE + " Q" +
+        command("\n\n        //| " + Qio.BLUE + " Q" +
                 Qio.BLACK + "io  cleaning dev env...\n");
 
         try {
@@ -64,9 +65,7 @@ public class DbMediator {
             conn.commit();
             conn.close();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) {}
 
         return true;
     }

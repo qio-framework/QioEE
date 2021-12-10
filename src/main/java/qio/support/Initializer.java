@@ -119,7 +119,7 @@ public class Initializer {
             command(PROCESS + " Go to \033[1;33mhttp://localhost:port" + qio.getServletContext().getContextPath() + "\033[0m\n\n\n\n\n");
         }
 
-        public Initializer build() throws Exception {
+        public Initializer build() throws Exception{
             qio.sign();
             setQioAttributes();
             runProcessors();

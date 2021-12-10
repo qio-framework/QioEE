@@ -19,7 +19,7 @@ import static qio.Qio.getResourceUri;
 
 
 @WebListener
-public class Listener implements ServletContextListener {
+public class EventsListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {

@@ -20,6 +20,8 @@ public class EndpointMapping {
 
     ObjectDetails objectDetails;
 
+    UrlBitFeatures urlBitFeatures;
+
     public EndpointMapping(){
         this.variablePositions = new ArrayList<>();
     }
@@ -88,4 +90,11 @@ public class EndpointMapping {
         this.objectDetails = objectDetails;
     }
 
+    public UrlBitFeatures getUrlBitFeatures() {
+        return urlBitFeatures;
+    }
+
+    public void setUrlBitFeatures(UrlBitFeatures urlBitFeatures) {
+        this.urlBitFeatures = urlBitFeatures;
+    }
 }

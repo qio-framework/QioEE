@@ -4,8 +4,8 @@
 	<artifactId>qio</artifactId>
 	<packaging>jar</packaging>
 	<version>0.14-SNAPSHOT</version>
-	<name>Qio</name>
-	<description>Qio Web Framework built for the Java EE Specification</description>
+	<name>QioEE</name>
+	<description>Qio Web Framework built on the Java EE Specification</description>
 	<url>https://www.qioframework.io</url>
 
 	<licenses>
