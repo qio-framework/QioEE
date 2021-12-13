@@ -12,10 +12,7 @@ import qio.storage.PropertyStorage;
 import qio.support.Initializer;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -660,6 +657,12 @@ public class Qio {
         return qualifiedName.toLowerCase();
     }
 
+    public String getMain(){
+        for(final Map.Entry<String, String> entry : System.getenv().entrySet()) {
+            if(entry.getKey().startsWith("JAVA_MAIN_CLASS")) return entry.getValue();
+        }
+        throw new IllegalStateException("Apologies, it seems you are trying to run this as a jar but have not main defined.");
+    }
 
     public Enumeration getJarEntries(){
         JarFile jarFile = getJarFile();
@@ -691,11 +694,18 @@ public class Qio {
         return null;
     }
 
-    public String getMain(){
-        for(final Map.Entry<String, String> entry : System.getenv().entrySet()) {
-            if(entry.getKey().startsWith("JAVA_MAIN_CLASS")) return entry.getValue();
+    public StringBuilder convert(InputStream in){
+        StringBuilder builder = new StringBuilder();
+        Scanner scanner = new Scanner(in);
+        do{
+            builder.append(scanner.nextLine());
+        }while(scanner.hasNext());
+        try {
+            in.close();
+        }catch (IOException ioex) {
+            ioex.printStackTrace();
         }
-        throw new IllegalStateException("Apologies, it seems you are trying to run this as a jar but have not main defined.");
+        return builder;
     }
 
     public static <T> Collector<T, ?, T> toSingleton() {

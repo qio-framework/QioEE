@@ -87,6 +87,7 @@ public class RequestModulator {
                 context.setAttribute("qio-redirect", responseData);
                 resp.sendRedirect(context.getContextPath() + path);
             }else{
+                if(qio.isJar()) response = reformat(uri, response);
                 setRequestAttributes(req, responseData);
                 req.getRequestDispatcher(response).forward(req, resp);
             }
@@ -106,6 +107,29 @@ public class RequestModulator {
 
         return true;
     }
+
+    private String reformat(String uri, String response){
+        if(response.startsWith("/"))response = response.replaceFirst("/", "");
+
+        uri = uri.replaceFirst("/","");
+
+        String[] uriBits = uri.split("/");
+
+        if(uriBits.length > 0){
+            String prefix = "";
+            int idx = 0;
+            for(String bit: uriBits){
+                if(!bit.equals("")) {
+                    if (idx > 0) prefix += "../";
+                    idx++;
+                }
+            }
+            response = prefix + response;
+        }
+
+        return response;
+    }
+
 
     private void setRequestAttributes(HttpServletRequest req, ResponseData responseData) {
         for (Map.Entry<String, Object> objEntry : responseData.getData().entrySet()) {

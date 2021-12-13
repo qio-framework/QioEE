@@ -5,13 +5,12 @@ import org.h2.tools.RunScript;
 import qio.model.Element;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.FileReader;
-import java.io.PrintWriter;
-import java.io.StringReader;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.sql.Connection;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import static qio.Qio.DATASOURCE;
 import static qio.Qio.command;
@@ -20,6 +19,8 @@ public class DbMediator {
 
     Qio qio;
 
+    final String CREATEDB_URI = "src/main/resources/create-db.sql";
+
     public DbMediator(Qio qio){
         this.qio = qio;
     }
@@ -27,7 +28,18 @@ public class DbMediator {
     public Boolean createDb() throws Exception {
 
         String artifactPath = Qio.getResourceUri(qio.servletContext);
-        File createFile = new File(artifactPath + File.separator + qio.getDbScript());
+
+        StringBuilder createSql;
+        if(qio.isJar()){
+            JarFile jarFile = qio.getJarFile();
+            JarEntry jarEntry = jarFile.getJarEntry(CREATEDB_URI);
+            InputStream in = jarFile.getInputStream(jarEntry);
+            createSql = qio.convert(in);
+        }else{
+            File createFile = new File(artifactPath + File.separator + qio.getDbScript());
+            InputStream in = new FileInputStream(createFile);
+            createSql = qio.convert(in);
+        }
 
         DataSource datasource = (DataSource) qio.getElement(DATASOURCE);
 
@@ -45,7 +57,7 @@ public class DbMediator {
         }
         Connection conn = datasource.getConnection();
         RunScript.execute(conn, new StringReader("drop all objects;"));
-        RunScript.execute(conn, new FileReader(createFile));
+        RunScript.execute(conn, new StringReader(createSql.toString()));
         conn.commit();
         conn.close();
 
