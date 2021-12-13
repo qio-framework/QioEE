@@ -13,11 +13,14 @@ import qio.support.Initializer;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
@@ -35,6 +38,7 @@ public class Qio {
     public static final String HTTP_RESOURCES = "qio-resources";
     public static final String HTTP_REDIRECT  = "[redirect]";
     public static final String QIO_REDIRECT   = "qio-redirect";
+    public static final String RESOURCES      = "/src/main/resources/";
     public static final String BLACK          = "\033[0;30m";
     public static final String BLUE           = "\033[1;34m";
     public static final String PROCESS        = "        [+]  ";
@@ -590,7 +594,16 @@ public class Qio {
         if(classesDir.exists()) {
             return classesUri;
         }
-        throw new Exception("Qio : unable to locate resource path");
+
+        final String RESOURCES_URI = "/src/main/resources/";
+        URL indexUri = Qio.class.getResource(RESOURCES_URI);
+        System.out.println("uri " + indexUri.toURI().toString());
+        if (indexUri == null) {
+            throw new FileNotFoundException("Qio : unable to find resource " + RESOURCES_URI);
+        }
+
+        return indexUri.toURI().toString();
+
     }
 
     public String getClassesUri() throws Exception {
@@ -609,7 +622,12 @@ public class Qio {
         if(classesDir.exists()){
             return classesUri;
         }
-        throw new Exception("Qio : unable to locate class uri");
+
+        classesUri = this.getClass().getResource("").toURI().toString();
+        if(classesUri == null){
+            throw new Exception("Qio : unable to locate class uri");
+        }
+        return classesUri;
     }
 
     public static String getTypeName(String typeName) {

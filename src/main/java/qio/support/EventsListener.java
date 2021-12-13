@@ -10,6 +10,8 @@ import qio.model.Element;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,9 +29,28 @@ public class EventsListener implements ServletContextListener {
         try {
 
             ServletContext servletContext = sce.getServletContext();
-            FileInputStream is = new FileInputStream(
-                    getResourceUri(servletContext) + File.separator + "qio.props"
-            );
+
+            InputStream is = null;
+
+            if(is == null) {
+                is = this.getClass().getResourceAsStream("/src/main/resources/qio.props");
+            }
+            if(is == null) {
+                try {
+                    String uri = getResourceUri(servletContext) + File.separator + "qio.props";
+                    is = new FileInputStream(uri);
+                } catch (FileNotFoundException fnfe) {
+                }
+            }
+
+            if (is == null) {
+                throw new Exception("Qio : qio.props not found in src/main/resources/");
+            }
+
+
+
+
+
             Properties props = new Properties();
             props.load(is);
 

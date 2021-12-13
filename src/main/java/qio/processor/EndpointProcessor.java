@@ -122,7 +122,6 @@ public class EndpointProcessor {
             }
         }
 
-
 //https://regex101.com/r/sYeDyN/1
 //\/(post){1}\/[A-Za-z0-9]*\/(paul){1}$
 //\/(get){1}\/[A-Za-z0-9]\/[A-Za-z0-9]\/[A-Za-z0-9]\/$
