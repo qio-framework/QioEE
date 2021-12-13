@@ -18,7 +18,6 @@ public class HttpMediator extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) {
-        System.out.println("http mediator init");
         ServletContext servletContext = config.getServletContext();
         Element element = (Element) servletContext.getAttribute(Qio.QIO);
         Qio qio = (Qio)element.getElement();

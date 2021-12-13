@@ -48,13 +48,10 @@ public class Initializer {
         }
 
         private void validateDatasource() throws Exception {
-//            System.out.println(PROCESS + " validating datasource");
             Element element = qio.getElementStorage().getElements().get(Qio.DATASOURCE);
             if(element != null){
                 DataSource dataSource = (DataSource) element.getElement();
                 qio.setDataSource(dataSource);
-            }else{
-//                System.out.println("              configured as basic web project");
             }
         }
 
@@ -115,8 +112,7 @@ public class Initializer {
         }
 
         private void sayReady(){
-            Date date = new Date();
-//            command("[INFO] " + date.toString() +  " Qio ready \u2713 : o . o . o . o . o . o . o . o . o . o . o . o  ");
+            command("[READY] Qio \u2713 : o . o . o . o . o . o . o . o . o . o . o . o  ");
         }
 
         public Initializer build() throws Exception{

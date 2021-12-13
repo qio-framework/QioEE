@@ -671,8 +671,6 @@ public class Qio {
             URL jarUri = Qio.class.getClassLoader().getResource("qio/");
             String jarPath = jarUri.getPath().substring(5, jarUri.getPath().indexOf("!"));
 
-            System.out.println("tres " + jarUri + " : " + jarPath);
-
             return new JarFile(jarPath);
         }catch(IOException ex){
             ex.printStackTrace();
@@ -691,6 +689,13 @@ public class Qio {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    public String getMain(){
+        for(final Map.Entry<String, String> entry : System.getenv().entrySet()) {
+            if(entry.getKey().startsWith("JAVA_MAIN_CLASS")) return entry.getValue();
+        }
+        throw new IllegalStateException("Apologies, it seems you are trying to run this as a jar but have not main defined.");
     }
 
     public static <T> Collector<T, ?, T> toSingleton() {

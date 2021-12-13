@@ -11,8 +11,6 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static qio.Qio.command;
-
 public class InstanceProcessor {
 
     Qio qio;
@@ -42,6 +40,7 @@ public class InstanceProcessor {
         return this;
     }
 
+
     private List<String> setJarDeps(){
         jarDeps = new ArrayList<>();
 
@@ -63,15 +62,32 @@ public class InstanceProcessor {
         return jarDeps;
     }
 
-    protected boolean isDep(JarEntry jarEntry){
-        String jarPath = getPath(jarEntry.toString());
+    protected boolean isDep(String jarEntry){
+        String jarPath = getPath(jarEntry);
         for(String dep : jarDeps){
             if(jarPath.contains(dep))return true;
         }
         return false;
     }
 
-    protected boolean isDirt(String jarEntry){
+    //Thank you walen
+    private int getLastIndxOf(int nth, String ch, String string) {
+        if (nth <= 0) return string.length();
+        return getLastIndxOf(--nth, ch, string.substring(0, string.lastIndexOf(ch)));
+    }
+
+    protected Boolean isWithinRunningProgram(String jarEntry){
+        String main = qio.getMain();
+        String path = main.substring(0, getLastIndxOf(1, ".", main) + 1);
+        String jarPath = getPath(jarEntry);
+        return jarPath.contains(path) ? true : false;
+    }
+
+    protected Boolean isDirt(String jarEntry){
+        if(qio.isJar() &&
+                !isWithinRunningProgram(jarEntry) &&
+                    isDep(jarEntry))return true;
+
         if(qio.isJar() && !jarEntry.endsWith(".class"))return true;
         if(jarEntry.contains("org/h2"))return true;
         if(jarEntry.contains("package-info"))return true;
@@ -79,6 +95,7 @@ public class InstanceProcessor {
         if(jarEntry.contains("META-INF/"))return true;
         if(jarEntry.contains("$"))return true;
         if(jarEntry.endsWith("Exception"))return true;
+
         return false;
     }
 
@@ -98,7 +115,6 @@ public class InstanceProcessor {
                     continue;
                 }
 
-                if(isDep(jarEntry))continue;
                 if(isDirt(jarEntry.toString()))continue;
 
 //                if(jarEntry.toString().contains("javax"))continue;
