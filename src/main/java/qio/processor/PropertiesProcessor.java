@@ -33,7 +33,6 @@ public class PropertiesProcessor {
     }
 
     public void run() throws IOException {
-//        command(Qio.PROCESS + " resolving properties");
 
         if (qio.getPropertiesFiles() != null) {
 

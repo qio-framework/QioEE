@@ -90,7 +90,6 @@ public class Initializer {
         }
 
         private void runEndpointProcessor() throws Exception {
-//            command(PROCESS + " processing endpoints");
             EndpointProcessor endpointProcessor = new EndpointProcessor(qio).run();
             EndpointMappings endpointMappings = endpointProcessor.getMappings();
             qio.setEndpointMappings(endpointMappings);
@@ -116,10 +115,8 @@ public class Initializer {
         }
 
         private void sayReady(){
-//            command(PROCESS + " project ready \u2713");
-//            command(PROCESS + " Go to \033[1;33mhttp://localhost:port" + qio.getServletContext().getContextPath() + "\033[0m\n\n\n\n\n");
             Date date = new Date();
-            command("[INFO] " + date.toString() +  " Qio ready \u2713 : o . o . o . o . o . o . o . o . o . o . o . o  ");
+//            command("[INFO] " + date.toString() +  " Qio ready \u2713 : o . o . o . o . o . o . o . o . o . o . o . o  ");
         }
 
         public Initializer build() throws Exception{

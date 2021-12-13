@@ -50,7 +50,6 @@ public class EventsListener implements ServletContextListener {
 
 
 
-
             Properties props = new Properties();
             props.load(is);
 

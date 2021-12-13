@@ -14,6 +14,7 @@ import qio.support.Initializer;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -23,10 +24,8 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.jar.JarFile;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -48,6 +47,7 @@ public class Qio {
                 Qio.BLACK + "io    \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ \n");
     }
 
+    Boolean isFatJar;
     Object events;
     ElementStorage elementStorage;
     DataSource dataSource;
@@ -79,10 +79,24 @@ public class Qio {
         this.elementStorage = new ElementStorage();
         this.propertyStorage = new PropertyStorage();
         this.objects = new HashMap<>();
-
+        this.isFatJar = getIsFatJar();
         new Initializer.Builder()
                 .withQio(this)
                 .build();
+    }
+
+    public Boolean isJar(){
+        return this.isFatJar;
+    }
+
+    private Boolean getIsFatJar(){
+        String uri = null;
+        try {
+            uri = getClassesUri();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return uri.contains("jar:file:") ? true : false;
     }
 
     public Object getElement(String name){
@@ -597,7 +611,6 @@ public class Qio {
 
         final String RESOURCES_URI = "/src/main/resources/";
         URL indexUri = Qio.class.getResource(RESOURCES_URI);
-        System.out.println("uri " + indexUri.toURI().toString());
         if (indexUri == null) {
             throw new FileNotFoundException("Qio : unable to find resource " + RESOURCES_URI);
         }
@@ -645,6 +658,39 @@ public class Qio {
             qualifiedName = qualifiedName.substring(index + 1);
         }
         return qualifiedName.toLowerCase();
+    }
+
+
+    public Enumeration getJarEntries(){
+        JarFile jarFile = getJarFile();
+        return jarFile.entries();
+    }
+
+    public JarFile getJarFile(){
+        try {
+            URL jarUri = Qio.class.getClassLoader().getResource("qio/");
+            String jarPath = jarUri.getPath().substring(5, jarUri.getPath().indexOf("!"));
+
+            System.out.println("tres " + jarUri + " : " + jarPath);
+
+            return new JarFile(jarPath);
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public static Enumeration getEntries(){
+        try {
+            URL jarUriTres = Qio.class.getClassLoader().getResource("qio/");
+            String jarPath = jarUriTres.getPath().substring(5, jarUriTres.getPath().indexOf("!"));
+
+            return new JarFile(jarPath).entries();
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     public static <T> Collector<T, ?, T> toSingleton() {

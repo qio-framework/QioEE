@@ -5,7 +5,6 @@ import qio.annotate.Events;
 import qio.model.support.ObjectDetails;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
@@ -19,29 +18,16 @@ public class InstanceProcessor {
     Qio qio;
     ClassLoader cl;
     List<String> jarDeps;
-    Boolean isJar;
     Map<String, ObjectDetails> objects;
 
     public InstanceProcessor(Qio qio){
         this.qio = qio;
         this.objects = new HashMap<>();
         this.cl = Thread.currentThread().getContextClassLoader();
-        this.setJar();
-    }
-
-    private void setJar(){
-        String uri = null;
-        try {
-            uri = qio.getClassesUri();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        this.isJar =  uri.contains("jar:file:") ? true : false;
     }
 
     public InstanceProcessor run() {
-//        command(Qio.PROCESS + " initializing dependencies");
-        if (this.isJar) {
+        if (qio.isJar()) {
             setJarDeps();
             getClassesJar();
         }else{
@@ -58,28 +44,21 @@ public class InstanceProcessor {
 
     private List<String> setJarDeps(){
         jarDeps = new ArrayList<>();
-        try {
 
-            URL jarUriTres = this.cl.getResource("qio/");
-            String jarPath = jarUriTres.getPath().substring(5, jarUriTres.getPath().indexOf("!"));
+        Enumeration<JarEntry> entries = qio.getJarEntries();
 
-            JarFile qioFile = new JarFile(jarPath);
-            Enumeration files = qioFile.entries();
+        do{
 
-            do{
-                JarEntry jarEntry = (JarEntry) files.nextElement();
-                String path = getPath(jarEntry.toString());
+            JarEntry jarEntry = entries.nextElement();
+            String path = getPath(jarEntry.toString());
 
-                if(!path.contains("META-INF.maven."))continue;
+            if(!path.contains("META-INF.maven."))continue;
 
-                String dep = path.substring(14);
-                jarDeps.add(dep);
+            String dep = path.substring(14);
+            jarDeps.add(dep);
 
-            }while(files.hasMoreElements());
+        }while(entries.hasMoreElements());
 
-        }catch(IOException ioex){
-            ioex.printStackTrace();
-        }
 
         return jarDeps;
     }
@@ -93,7 +72,7 @@ public class InstanceProcessor {
     }
 
     protected boolean isDirt(String jarEntry){
-        if(isJar && !jarEntry.endsWith(".class"))return true;
+        if(qio.isJar() && !jarEntry.endsWith(".class"))return true;
         if(jarEntry.contains("org/h2"))return true;
         if(jarEntry.contains("package-info"))return true;
         if(jarEntry.startsWith("module-info"))return true;

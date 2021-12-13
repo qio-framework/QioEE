@@ -35,7 +35,7 @@ public class RequestModulator {
         String uri = getUri(req);
 
         if(StaticResource.isResource(uri, qio.getResources())){
-            StaticResource staticResource = new StaticResource(uri, servletContext, resp);
+            StaticResource staticResource = new StaticResource(uri, qio, servletContext, resp);
             staticResource.serve();
             return true;
         }
@@ -66,6 +66,7 @@ public class RequestModulator {
 
         try {
             String response = (String) method.invoke(object, parameters);
+
             if(response == null) return false;
 
             if(method.isAnnotationPresent(JsonOutput.class)){
