@@ -22,7 +22,10 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -476,6 +479,8 @@ public class Qio {
         this.dataSource = dataSource;
     }
 
+
+
     public static class Injector{
 
         Boolean devMode;
@@ -658,9 +663,30 @@ public class Qio {
     }
 
     public String getMain(){
-        for(final Map.Entry<String, String> entry : System.getenv().entrySet()) {
-            if(entry.getKey().startsWith("JAVA_MAIN_CLASS")) return entry.getValue();
+        try {
+            JarFile jarFile = getJarFile();
+            JarEntry jarEntry = jarFile.getJarEntry("META-INF/MANIFEST.MF");
+            InputStream in = jarFile.getInputStream(jarEntry);
+            Scanner scanner = new Scanner(in);
+
+            String line = "";
+            do{
+                line = scanner.nextLine();
+                if(line.contains("Main-Class")){
+                    line = line.replace("Main-Class", "");
+                    break;
+                }
+            }
+            while(scanner.hasNext());
+
+            line = line.replace(":", "").trim();
+            return line;
+
+        } catch (IOException ioex) {
+            ioex.printStackTrace();
         }
+
+
         throw new IllegalStateException("Apologies, it seems you are trying to run this as a jar but have not main defined.");
     }
 
@@ -692,6 +718,19 @@ public class Qio {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    public String getProjectName() {
+        if(isJar()) {
+            JarFile jarFile = getJarFile();
+            String path = jarFile.getName();
+            String[] bits = path.split("/");
+            String namePre = bits[bits.length - 1];
+            return namePre.replace(".jar", "");
+        }else{
+            ServletContext context = getServletContext();
+            return context.getServletContextName();
+        }
     }
 
     public StringBuilder convert(InputStream in){

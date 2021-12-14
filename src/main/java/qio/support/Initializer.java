@@ -112,7 +112,8 @@ public class Initializer {
         }
 
         private void sayReady(){
-            command("[READY] Qio \u2713 : o . o . o . o . o . o . o . o . o . o . o . o  ");
+            String name = qio.getProjectName();
+            command("[READY] " + name +"! : o . o . o . o . o . o . o . o . o . o . o . o  ");
         }
 
         public Initializer build() throws Exception{
