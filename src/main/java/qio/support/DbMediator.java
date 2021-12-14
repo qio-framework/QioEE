@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.sql.Connection;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -54,7 +55,7 @@ public class DbMediator {
                         "Feel free to use qio.jdbc.BasicDataSource to " +
                         "get started.\n" +
                         "           " +
-                        "You can also checkout HikariCP, it is pretty good!" +
+                        "You can also checkout HikariCP, it is awesome!" +
                         "\n\n" +
                         "           https://github.com/brettwooldridge/HikariCP\n\n\n");
             }
