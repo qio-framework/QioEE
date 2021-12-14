@@ -47,14 +47,16 @@ public class Qio {
                 Qio.BLACK + "io    \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ \n");
     }
 
-    Boolean isFatJar;
+    Boolean fatJar;
     Object events;
     ElementStorage elementStorage;
     DataSource dataSource;
 
     public static Map<String, Element> z;
 
-    public Boolean devMode;
+    public Boolean createDb;
+    public Boolean dropDb;
+    public Boolean isBasic;
     public ServletContext servletContext;
     public String dbScript;
 
@@ -72,24 +74,26 @@ public class Qio {
 
     public Qio(Injector injector) throws Exception {
         this.dbScript = "create-db.sql";
-        this.devMode = injector.devMode;
+        this.isBasic = injector.isBasic;
+        this.createDb = injector.createDb;
+        this.dropDb = injector.dropDb;
         this.servletContext = injector.servletContext;
         this.resources = injector.resources;
         this.propertiesFiles = injector.propertyFiles;
         this.elementStorage = new ElementStorage();
         this.propertyStorage = new PropertyStorage();
         this.objects = new HashMap<>();
-        this.isFatJar = getIsFatJar();
+        this.fatJar = getFatJar();
         new Initializer.Builder()
                 .withQio(this)
                 .build();
     }
 
     public Boolean isJar(){
-        return this.isFatJar;
+        return this.fatJar;
     }
 
-    private Boolean getIsFatJar(){
+    private Boolean getFatJar(){
         String uri = null;
         try {
             uri = getClassesUri();
@@ -483,14 +487,24 @@ public class Qio {
 
     public static class Injector{
 
-        Boolean devMode;
+        Boolean isBasic;
+        Boolean createDb;
+        Boolean dropDb;
         List<String> resources;
         List<String> propertyFiles;
         ServletContext servletContext;
 
         public Injector(){}
-        public Qio.Injector setDevEnv(boolean devMode){
-            this.devMode = devMode;
+        public Qio.Injector setBasic(boolean isBasic){
+            this.isBasic = isBasic;
+            return this;
+        }
+        public Qio.Injector setCreateDb(boolean createDb){
+            this.createDb = createDb;
+            return this;
+        }
+        public Qio.Injector setDropDb(boolean dropDb){
+            this.dropDb = dropDb;
             return this;
         }
         public Qio.Injector withPropertyFiles(List<String> propertyFiles){
@@ -509,11 +523,9 @@ public class Qio {
         public Qio inject() throws Exception {
             return new Qio(this);
         }
+
     }
 
-    public boolean inDevMode(){
-        return this.devMode;
-    }
     public ServletContext getServletContext(){
         return this.servletContext;
     }
@@ -525,7 +537,7 @@ public class Qio {
             return propertyStorage.getProperties().get("db.url");
         }
 
-        if(inDevMode() &&
+        if(!isBasic &&
                 !propertyStorage.getProperties().containsKey("db.url")){
             throw new Exception("\n\n           Reminder, in order to be in dev mode \n" +
                     "           you need to configure a datasource.\n\n\n");
@@ -725,6 +737,9 @@ public class Qio {
             JarFile jarFile = getJarFile();
             String path = jarFile.getName();
             String[] bits = path.split("/");
+            if(bits.length == 0){
+                bits = path.split("\\");
+            }
             String namePre = bits[bits.length - 1];
             return namePre.replace(".jar", "");
         }else{

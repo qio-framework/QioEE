@@ -53,11 +53,36 @@ public class EventsListener implements ServletContextListener {
             Properties props = new Properties();
             props.load(is);
 
-            Object devModeProp = props.get("qio.dev");
-            Boolean devMode = false;
-            if(devModeProp != null){
-                devMode = Boolean.parseBoolean(devModeProp.toString().replaceAll("\\s+", ""));
+            Object env = props.get("qio.env");
+
+            Boolean isBasic = true;
+            Boolean createDb = false;
+            Boolean dropDb = false;
+            if(env != null){
+                String environment = env.toString().replaceAll("\\s+", "");
+                List<String> properties = Arrays.asList(environment.split(","));
+                for(String prop : properties){
+                    if(prop.equals("create")){
+                        isBasic = false;
+                        createDb = true;
+                    }
+                    if(prop.equals("drop")){
+                        isBasic = false;
+                        dropDb = true;
+                    }
+                    if (prop.equals("plain") ||
+                            prop.equals("basic") ||
+                                prop.equals("empty") ||
+                                    prop.equals("")){
+                        isBasic = true;
+                    }
+                }
             }
+
+            if(isBasic && (createDb || dropDb))
+                throw new Exception("You need to either set qio.env=basic for basic systems that do not need " +
+                        "a database connection, or qio.env=create to create a db using src/main/resource/create-db.sql, " +
+                        "or qio.env=create,drop to both create and drop a database.");
 
             Object resourcesProp = props.get("qio.assets");
             Object propertiesProp = props.get("qio.properties");
@@ -97,7 +122,9 @@ public class EventsListener implements ServletContextListener {
             }
 
             new Qio.Injector()
-                    .setDevEnv(devMode)
+                    .setBasic(isBasic)
+                    .setCreateDb(createDb)
+                    .setDropDb(dropDb)
                     .withContext(servletContext)
                     .withWebResources(resources)
                     .withPropertyFiles(properties)
@@ -113,7 +140,7 @@ public class EventsListener implements ServletContextListener {
         ServletContext servletContext = sce.getServletContext();
         Element qioElement = (Element)servletContext.getAttribute(Qio.QIO);
         Qio qio = (Qio) qioElement.getElement();
-        if(qio.inDevMode()) {
+        if(!qio.isBasic) {
             DbMediator mediator = (DbMediator) qio.getElement(Qio.DBMEDIATOR);
             try {
                 mediator.dropDb();

@@ -29,58 +29,74 @@ public class DbMediator {
 
         String artifactPath = Qio.getResourceUri(qio.servletContext);
 
-        StringBuilder createSql;
-        if(qio.isJar()){
-            JarFile jarFile = qio.getJarFile();
-            JarEntry jarEntry = jarFile.getJarEntry(CREATEDB_URI);
-            InputStream in = jarFile.getInputStream(jarEntry);
-            createSql = qio.convert(in);
-        }else{
-            File createFile = new File(artifactPath + File.separator + qio.getDbScript());
-            InputStream in = new FileInputStream(createFile);
-            createSql = qio.convert(in);
-        }
+        if(!qio.isBasic &&
+                qio.createDb) {
 
-        DataSource datasource = (DataSource) qio.getElement(DATASOURCE);
+            StringBuilder createSql;
+            if (qio.isJar()) {
+                JarFile jarFile = qio.getJarFile();
+                JarEntry jarEntry = jarFile.getJarEntry(CREATEDB_URI);
+                InputStream in = jarFile.getInputStream(jarEntry);
+                createSql = qio.convert(in);
+            } else {
+                File createFile = new File(artifactPath + File.separator + qio.getDbScript());
+                InputStream in = new FileInputStream(createFile);
+                createSql = qio.convert(in);
+            }
 
-        if(datasource == null){
-            command("\n");
-            throw new Exception("\n\n           " +
-                    "You have qio.dev set to true in qio.props.\n           " +
-                    "In addition you need to configure a datasource. \n           " +
-                    "Feel free to use qio.jdbc.BasicDataSource to " +
-                    "get started.\n" +
-                    "           " +
-                    "You can also checkout HikariCP, it is pretty good!" +
-                    "\n\n" +
-                    "           https://github.com/brettwooldridge/HikariCP\n\n\n");
+            DataSource datasource = (DataSource) qio.getElement(DATASOURCE);
+
+            if (datasource == null) {
+                command("\n");
+                throw new Exception("\n\n           " +
+                        "You have qio.dev set to true in qio.props.\n           " +
+                        "In addition you need to configure a datasource. \n           " +
+                        "Feel free to use qio.jdbc.BasicDataSource to " +
+                        "get started.\n" +
+                        "           " +
+                        "You can also checkout HikariCP, it is pretty good!" +
+                        "\n\n" +
+                        "           https://github.com/brettwooldridge/HikariCP\n\n\n");
+            }
+            Connection conn = datasource.getConnection();
+
+            if(qio.dropDb) {
+                RunScript.execute(conn, new StringReader("drop all objects;"));
+            }
+
+            RunScript.execute(conn, new StringReader(createSql.toString()));
+            conn.commit();
+            conn.close();
         }
-        Connection conn = datasource.getConnection();
-        RunScript.execute(conn, new StringReader("drop all objects;"));
-        RunScript.execute(conn, new StringReader(createSql.toString()));
-        conn.commit();
-        conn.close();
 
         return true;
     }
 
     public Boolean dropDb() {
-        command("\n\n        //| " + Qio.BLUE + " Q" +
-                Qio.BLACK + "io  cleaning dev env...\n");
 
-        try {
+        if(!qio.isBasic &&
+                qio.dropDb) {
 
-            DataSource datasource = (DataSource) qio.getElement(DATASOURCE);
-            Connection conn = datasource.getConnection();
+            command("\n\n        //| " + Qio.BLUE + " Q" +
+                    Qio.BLACK + "io  cleaning dev env...\n");
 
-            RunScript.execute(conn, new StringReader("drop all objects;"));
-            conn.commit();
-            conn.close();
+            try {
 
-        } catch (Exception e) {}
+                DataSource datasource = (DataSource) qio.getElement(DATASOURCE);
+                Connection conn = datasource.getConnection();
+
+                RunScript.execute(conn, new StringReader("drop all objects;"));
+                conn.commit();
+                conn.close();
+
+            } catch (Exception e) {
+            }
+
+        }
 
         return true;
     }
+
 
 }
 

@@ -37,8 +37,8 @@ public class Initializer {
             if(qio.getPropertiesFiles() == null) qio.setPropertiesFiles(new ArrayList<>());
         }
         
-        private void checkInitDevDb() throws Exception{
-            if (qio.inDevMode()){
+        private void initDb() throws Exception{
+            if (qio.createDb){
                 DbMediator mediator = new DbMediator(qio);
                 Element element = new Element();
                 element.setElement(mediator);
@@ -57,7 +57,7 @@ public class Initializer {
 
         private void setQioDbAttributes() throws Exception {
             validateDatasource();
-            checkInitDevDb();
+            initDb();
         }
 
         private void dispatchEvent() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
